@@ -89,7 +89,6 @@ else{
 				throw "Unknown install extension";
 			}
 		} else {
-
 			if($DotNetInstallExtension -eq "ps1"){
 				ExecSafe { & $DotNetInstallFile -InstallDir $DotNetDirectory -Version $DotNetVersion -NoPath }
 			}
@@ -104,7 +103,7 @@ else{
 	}
 }
 
-$env:Path += $DotNetDirectory;
+$env:PATH += $DotNetDirectory;
 $env:DOTNET_ROOT = $DotNetDirectory;
 
 Write-Output "Microsoft (R) .NET Core SDK version $(& $env:DOTNET_EXE --version)"

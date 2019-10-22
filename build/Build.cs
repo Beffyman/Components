@@ -27,7 +27,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 	AzurePipelinesImage.MacOsLatest,
 	InvokedTargets = new[] { nameof(Pack), nameof(Report), nameof(Performance) },
 	ExcludedTargets = new string[] { nameof(Clean) },
-	NonEntryTargets = new string[] { nameof(Restore) })]
+	NonEntryTargets = new string[] { nameof(Restore), nameof(Test) })]
 public partial class Build : NukeBuild
 {
 	public static int Main() => Execute<Build>(x => x.Compile);
@@ -49,8 +49,7 @@ public partial class Build : NukeBuild
 	AbsolutePath BenchmarksProject => BenchmarksProjectDirectory / $"{BenchmarksProjectName}.csproj";
 	AbsolutePath BenchmarksProjectArtifactsDirectory => BenchmarksProjectDirectory / "BenchmarkDotNet.Artifacts";
 
-
-	AbsolutePath ArtifactsDirectory => !string.IsNullOrEmpty(AzurePipelines.Instance?.ArtifactStagingDirectory) ? (AbsolutePath)AzurePipelines.Instance?.ArtifactStagingDirectory : RootDirectory / "artifacts";
+	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
 	AbsolutePath NugetArtifactsDirectory => ArtifactsDirectory / "Nuget";
 	AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "Tests";
 	AbsolutePath PerformanceArtifactsDirectory => ArtifactsDirectory / "Performance";
