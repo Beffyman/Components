@@ -24,9 +24,10 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 [AzurePipelines(
 	AzurePipelinesImage.WindowsLatest,
 	AzurePipelinesImage.UbuntuLatest,
+	AzurePipelinesImage.MacOsLatest,
 	InvokedTargets = new[] { nameof(CI) },
 	ExcludedTargets = new string[] { nameof(Clean) },
-	NonEntryTargets = new string[] { })]
+	NonEntryTargets = new string[] { nameof(Restore) })]
 public partial class Build : NukeBuild
 {
 	public static int Main() => Execute<Build>(x => x.Compile);
@@ -74,6 +75,8 @@ public partial class Build : NukeBuild
 		.Executes(() =>
 		{
 			SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+			SamplesDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
+			BenchmarksDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
 			TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
 			EnsureCleanDirectory(ArtifactsDirectory);
 		});
@@ -105,7 +108,7 @@ public partial class Build : NukeBuild
 		{
 			DotNetPack(s => s.SetProject(Solution)
 					.SetVersion(GitVersion.NuGetVersionV2)
-					.EnableNoBuild()
+					.SetNoBuild(AzurePipelines.Instance == null)
 					.EnableIncludeSource()
 					.EnableIncludeSymbols()
 					.SetConfiguration(Configuration)
@@ -118,7 +121,7 @@ public partial class Build : NukeBuild
 
 	Target Test => _ => _
 		.DependsOn(Compile)
-		.Produces(TestArtifactsDirectory / "*.trx")
+		.Produces(TestArtifactsDirectory / "*.trx", TestArtifactsDirectory / CodeCoverageFile)
 		.Executes(() =>
 		{
 			TestsDirectory.GlobFiles("**/*.csproj").ForEach(csproj =>
@@ -127,18 +130,17 @@ public partial class Build : NukeBuild
 				AbsolutePath coverageOutput = TestArtifactsDirectory / $"{projectName}";
 
 				DotNetTest(s => s.SetConfiguration(Configuration)
-				.EnableNoBuild()
-				.EnableNoRestore()
-				.SetLogger("trx")
-				.SetResultsDirectory(TestArtifactsDirectory)
-				.SetArgumentConfigurator(arguments =>
-					arguments.Add("/p:CollectCoverage={0}", "true")
-							.Add("/p:CoverletOutput={0}/", coverageOutput)
-							//.Add("/p:Threshold={0}", CodeCoverageRequirement)
-							.Add("/p:Exclude=\"[xunit*]*%2c[*.Tests]*\"")
-							.Add("/p:UseSourceLink={0}", "true")
-							.Add("/p:CoverletOutputFormat={0}", "cobertura"))
-				.SetProjectFile(csproj));
+					.SetNoBuild(AzurePipelines.Instance == null)
+					.SetLogger("trx")
+					.SetResultsDirectory(TestArtifactsDirectory)
+					.SetArgumentConfigurator(arguments =>
+						arguments.Add("/p:CollectCoverage={0}", "true")
+								.Add("/p:CoverletOutput={0}/", coverageOutput)
+								//.Add("/p:Threshold={0}", CodeCoverageRequirement)
+								.Add("/p:Exclude=\"[xunit*]*%2c[*.Tests]*\"")
+								.Add("/p:UseSourceLink={0}", "true")
+								.Add("/p:CoverletOutputFormat={0}", "cobertura"))
+					.SetProjectFile(csproj));
 
 				FileExists(coverageOutput);
 			});

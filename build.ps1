@@ -64,7 +64,7 @@ $env:DOTNET_EXE = "$DotNetDirectory\dotnet$DotNetExtension"
 if(!(Test-Path $DotNetVersionDirectory)){
 	# Download install script
 	$DotNetInstallFile = "$TempDirectory\dotnet-install.ps1"
-	md -force $TempDirectory > $null
+    New-Item -ItemType Directory -Path $TempDirectory | Out-Null
 	(New-Object System.Net.WebClient).DownloadFile($DotNetInstallUrl, $DotNetInstallFile)
 
 	# Install by channel or version

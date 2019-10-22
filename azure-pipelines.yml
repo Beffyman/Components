@@ -5,22 +5,14 @@ stages:
     pool:
       vmImage: 'windows-latest'
     jobs:
-      - job: Restore
-        displayName: '⬇️ Restore'
+      - job: Compile
+        displayName: '⚙️ Compile'
         dependsOn: [  ]
         steps:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Restore --skip'
-      - job: Compile
-        displayName: '⚙️ Compile'
-        dependsOn: [ Restore ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Compile --skip'
+              arguments: 'Restore Compile --skip'
       - job: Test
         displayName: '🚦 Test'
         dependsOn: [ Compile ]
@@ -33,6 +25,10 @@ stages:
             inputs:
               artifactName: Tests
               pathtoPublish: 'Tests'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: coverage.cobertura.xml
+              pathtoPublish: 'coverage.cobertura.xml'
       - job: Report
         displayName: '📄 Report'
         dependsOn: [ Test ]
@@ -67,22 +63,14 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-      - job: Restore
-        displayName: '⬇️ Restore'
+      - job: Compile
+        displayName: '⚙️ Compile'
         dependsOn: [  ]
         steps:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Restore --skip'
-      - job: Compile
-        displayName: '⚙️ Compile'
-        dependsOn: [ Restore ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Compile --skip'
+              arguments: 'Restore Compile --skip'
       - job: Test
         displayName: '🚦 Test'
         dependsOn: [ Compile ]
@@ -95,6 +83,68 @@ stages:
             inputs:
               artifactName: Tests
               pathtoPublish: 'Tests'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: coverage.cobertura.xml
+              pathtoPublish: 'coverage.cobertura.xml'
+      - job: Report
+        displayName: '📄 Report'
+        dependsOn: [ Test ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Report --skip'
+      - job: Pack
+        displayName: '📦 Pack'
+        dependsOn: [ Compile ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Pack --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Nuget
+              pathtoPublish: 'Nuget'
+      - job: CI
+        displayName: '☁️ CI'
+        dependsOn: [ Pack, Report ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'CI --skip'
+  - stage: macOS_latest
+    displayName: 'macOS-latest'
+    dependsOn: [  ]
+    pool:
+      vmImage: 'macOS-latest'
+    jobs:
+      - job: Compile
+        displayName: '⚙️ Compile'
+        dependsOn: [  ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Restore Compile --skip'
+      - job: Test
+        displayName: '🚦 Test'
+        dependsOn: [ Compile ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Test --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Tests
+              pathtoPublish: 'Tests'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: coverage.cobertura.xml
+              pathtoPublish: 'coverage.cobertura.xml'
       - job: Report
         displayName: '📄 Report'
         dependsOn: [ Test ]
