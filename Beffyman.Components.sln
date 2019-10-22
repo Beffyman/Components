@@ -1,0 +1,65 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.138
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Beffyman.Components", "src\Beffyman.Components\Beffyman.Components.csproj", "{4EB19606-85E2-4B46-8828-D07F3706AA05}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{B628D51B-90EF-402C-97A0-68728D4989CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{07BE22F8-B98B-4A4B-8C6A-BE73FE4CBF5E}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3CC4EF7E-27CA-4D8F-8BB2-53D31F107E5F}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{C4AEEAF2-F3D4-4E6F-AE26-4AA530DF8DE3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{AAFCC2BF-FF5C-4207-A5AE-6ADC82FD92D1}"
+	ProjectSection(SolutionItems) = preProject
+		benchmarks\Directory.Build.props = benchmarks\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B4AE822F-EA51-43F0-8C58-1B747F044673}"
+	ProjectSection(SolutionItems) = preProject
+		samples\Directory.Build.props = samples\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0B7DD9E-2B12-4A7D-B3F6-78811C50DE78}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4EB19606-85E2-4B46-8828-D07F3706AA05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EB19606-85E2-4B46-8828-D07F3706AA05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EB19606-85E2-4B46-8828-D07F3706AA05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EB19606-85E2-4B46-8828-D07F3706AA05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B628D51B-90EF-402C-97A0-68728D4989CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B628D51B-90EF-402C-97A0-68728D4989CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4EB19606-85E2-4B46-8828-D07F3706AA05} = {07BE22F8-B98B-4A4B-8C6A-BE73FE4CBF5E}
+		{B628D51B-90EF-402C-97A0-68728D4989CD} = {C4AEEAF2-F3D4-4E6F-AE26-4AA530DF8DE3}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {962F7FAB-2341-411A-9F0F-472C98FFA21D}
+	EndGlobalSection
+EndGlobal
