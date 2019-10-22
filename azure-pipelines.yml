@@ -1,74 +1,4 @@
 stages:
-  - stage: ubuntu_latest
-    displayName: 'ubuntu-latest'
-    dependsOn: [  ]
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - job: Clean
-        displayName: '🗑️ Clean'
-        dependsOn: [  ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Clean --skip'
-      - job: Restore
-        displayName: '⬇️ Restore'
-        dependsOn: [  ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Restore --skip'
-      - job: Compile
-        displayName: '⚙️ Compile'
-        dependsOn: [ Restore ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Compile --skip'
-      - job: Test
-        displayName: '🚦 Test'
-        dependsOn: [ Compile ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Test --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: Tests
-              pathtoPublish: 'Tests'
-      - job: Report
-        displayName: '📄 Report'
-        dependsOn: [ Test ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Report --skip'
-      - job: Pack
-        displayName: '📦 Pack'
-        dependsOn: [ Restore ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'Pack --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
-      - job: CI
-        displayName: '☁️ CI'
-        dependsOn: [ Clean, Pack, Report ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'CI --skip'
   - stage: windows_latest
     displayName: 'windows-latest'
     dependsOn: [  ]
@@ -139,11 +69,11 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'CI --skip'
-  - stage: macOS_latest
-    displayName: 'macOS-latest'
+  - stage: ubuntu_latest
+    displayName: 'ubuntu-latest'
     dependsOn: [  ]
     pool:
-      vmImage: 'macOS-latest'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: Clean
         displayName: '🗑️ Clean'

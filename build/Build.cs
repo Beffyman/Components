@@ -22,9 +22,8 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 [DotNetVerbosityMapping]
 [UnsetVisualStudioEnvironmentVariables]
 [AzurePipelines(
-	AzurePipelinesImage.UbuntuLatest,
 	AzurePipelinesImage.WindowsLatest,
-	AzurePipelinesImage.MacOsLatest,
+	AzurePipelinesImage.UbuntuLatest,
 	InvokedTargets = new[] { nameof(CI) },
 	ExcludedTargets = new string[] { },
 	NonEntryTargets = new string[] { })]
