@@ -24,7 +24,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 [AzurePipelines(
 	AzurePipelinesImage.WindowsLatest,
 	AzurePipelinesImage.UbuntuLatest,
-	AzurePipelinesImage.MacOsLatest,
+	//AzurePipelinesImage.MacOsLatest,
 	InvokedTargets = new[] { nameof(Pack), nameof(Report), nameof(Performance) },
 	ExcludedTargets = new string[] { nameof(Clean) },
 	NonEntryTargets = new string[] { nameof(Restore), nameof(Test) })]

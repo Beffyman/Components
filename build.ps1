@@ -106,8 +106,6 @@ else{
 $env:PATH += $DotNetDirectory;
 $env:DOTNET_ROOT = $DotNetDirectory;
 
-ExecSafe { & $env:DOTNET_EXE --info | Out-Host }
-
 Write-Output "Microsoft (R) .NET Core SDK version $(& $env:DOTNET_EXE --version)"
 
 ExecSafe { & $env:DOTNET_EXE build $BuildProjectFile -c Release /nodeReuse:false }
