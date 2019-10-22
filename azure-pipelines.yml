@@ -27,7 +27,7 @@ stages:
               pathtoPublish: 'Nuget'
       - job: Report
         displayName: '📄 Report'
-        dependsOn: [  ]
+        dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:
@@ -69,7 +69,7 @@ stages:
               pathtoPublish: 'Nuget'
       - job: Report
         displayName: '📄 Report'
-        dependsOn: [  ]
+        dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:
@@ -111,7 +111,7 @@ stages:
               pathtoPublish: 'Nuget'
       - job: Report
         displayName: '📄 Report'
-        dependsOn: [  ]
+        dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:

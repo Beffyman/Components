@@ -147,6 +147,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Report => _ => _
+		.DependsOn(Compile)
 		.DependsOn(Test)
 		.Executes(() =>
 		{
