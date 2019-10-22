@@ -69,7 +69,6 @@ $env:DOTNET_EXE = "$DotNetDirectory\dotnet$DotNetExtension"
 if ($null -ne (Get-Command "dotnet" -ErrorAction SilentlyContinue) -and `
      (!(Test-Path variable:DotNetVersion) -or $(& dotnet --version | Select-Object -First 1) -eq $DotNetVersion)) {
     $env:DOTNET_EXE = (Get-Command "dotnet").Path
-	& $env:DOTNET_EXE --info | Out-Host
 }
 else{
 	if(!(Test-Path $DotNetVersionDirectory)){
@@ -106,6 +105,8 @@ else{
 
 $env:PATH += $DotNetDirectory;
 $env:DOTNET_ROOT = $DotNetDirectory;
+
+ExecSafe { & $env:DOTNET_EXE --info | Out-Host }
 
 Write-Output "Microsoft (R) .NET Core SDK version $(& $env:DOTNET_EXE --version)"
 
