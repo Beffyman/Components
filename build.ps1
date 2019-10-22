@@ -4,12 +4,15 @@ Param(
     [string[]]$BuildArguments
 )
 
-Write-Output "Windows PowerShell $($Host.Version)"
+Write-Output "PowerShell $($PSVersionTable.PSEdition) version $($PSVersionTable.PSVersion)"
 
 Set-StrictMode -Version 2.0;
 $ErrorActionPreference = "Stop";
 $ConfirmPreference = "None";
-trap { Write-Error $_; exit 1 }
+trap {
+	Write-Error $_;
+	exit 1
+}
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 ###########################################################################
@@ -25,6 +28,7 @@ $DotNetChannel = "Current"
 
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = 1
+$env:NUGET_XMLDOC_MODE = "skip"
 
 ###########################################################################
 # EXECUTION
@@ -44,9 +48,18 @@ if (Test-Path $DotNetGlobalFile) {
 }
 
 # If dotnet is installed locally, and expected version is not set or installation matches the expected version
-$DotNetDirectory = "$TempDirectory\dotnet-win"
+if((Get-Variable IsWindows -ErrorAction SilentlyContinue) -eq $null){
+	$DotNetSuffix = "win";
+	$DotNetExtension = ".exe";
+}
+else{
+	$DotNetSuffix = if($IsWindows -eq $false -or $IsWindows -eq $null){"unix"} else{"win"};
+	$DotNetExtension = if($IsWindows -eq $false -or $IsWindows -eq $null){""} else{".exe"};
+}
+
+$DotNetDirectory = "$TempDirectory\dotnet-$DotNetSuffix"
 $DotNetVersionDirectory = "$DotNetDirectory\sdk\$DotNetVersion"
-$env:DOTNET_EXE = "$DotNetDirectory\dotnet.exe"
+$env:DOTNET_EXE = "$DotNetDirectory\dotnet$DotNetExtension"
 
 if(!(Test-Path $DotNetVersionDirectory)){
 	# Download install script
@@ -64,7 +77,6 @@ if(!(Test-Path $DotNetVersionDirectory)){
 
 $env:Path += $DotNetDirectory;
 $env:DOTNET_ROOT = $DotNetDirectory;
-$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = $DotNetDirectory;
 
 Write-Output "Microsoft (R) .NET Core SDK version $(& $env:DOTNET_EXE --version)"
 

@@ -25,7 +25,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 	AzurePipelinesImage.WindowsLatest,
 	AzurePipelinesImage.UbuntuLatest,
 	InvokedTargets = new[] { nameof(CI) },
-	ExcludedTargets = new string[] { },
+	ExcludedTargets = new string[] { nameof(Clean) },
 	NonEntryTargets = new string[] { })]
 public partial class Build : NukeBuild
 {
@@ -99,7 +99,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Pack => _ => _
-		.DependsOn(Restore)
+		.DependsOn(Compile)
 		.Produces(NugetArtifactsDirectory / "*.nupkg", NugetArtifactsDirectory / "*.snupkg")
 		.Executes(() =>
 		{
