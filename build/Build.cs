@@ -25,7 +25,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 	AzurePipelinesImage.WindowsLatest,
 	AzurePipelinesImage.UbuntuLatest,
 	AzurePipelinesImage.MacOsLatest,
-	InvokedTargets = new[] { nameof(CI) },
+	InvokedTargets = new[] { nameof(Pack), nameof(Report), nameof(Performance) },
 	ExcludedTargets = new string[] { nameof(Clean) },
 	NonEntryTargets = new string[] { nameof(Restore) })]
 public partial class Build : NukeBuild
@@ -61,10 +61,7 @@ public partial class Build : NukeBuild
 	string ReportsOutput => "Reports";
 
 
-	Target CI => _ => _
-		.DependsOn(Clean)
-		.DependsOn(Pack)
-		.DependsOn(Report)
+	Target Label => _ => _
 		.Executes(() =>
 		{
 			AzurePipelines.Instance?.UpdateBuildNumber(GitVersion.NuGetVersionV2);
@@ -106,6 +103,8 @@ public partial class Build : NukeBuild
 		.Produces(NugetArtifactsDirectory / "*.nupkg", NugetArtifactsDirectory / "*.snupkg")
 		.Executes(() =>
 		{
+			EnsureExistingDirectory(NugetArtifactsDirectory);
+
 			DotNetPack(s => s.SetProject(Solution)
 					.SetVersion(GitVersion.NuGetVersionV2)
 					.SetNoBuild(AzurePipelines.Instance == null)
@@ -124,6 +123,8 @@ public partial class Build : NukeBuild
 		.Produces(TestArtifactsDirectory / "*.trx", TestArtifactsDirectory / CodeCoverageFile)
 		.Executes(() =>
 		{
+			EnsureExistingDirectory(TestArtifactsDirectory);
+
 			TestsDirectory.GlobFiles("**/*.csproj").ForEach(csproj =>
 			{
 				var projectName = Path.GetFileNameWithoutExtension(csproj);

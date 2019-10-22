@@ -13,6 +13,18 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Restore Compile --skip'
+      - job: Pack
+        displayName: '📦 Pack'
+        dependsOn: [ Compile ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Pack --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Nuget
+              pathtoPublish: 'Nuget'
       - job: Test
         displayName: '🚦 Test'
         dependsOn: [ Compile ]
@@ -37,26 +49,14 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Report --skip'
-      - job: Pack
-        displayName: '📦 Pack'
+      - job: Performance
+        displayName: '⏲️ Performance'
         dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Pack --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
-      - job: CI
-        displayName: '☁️ CI'
-        dependsOn: [ Pack, Report ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'CI --skip'
+              arguments: 'Performance --skip'
   - stage: ubuntu_latest
     displayName: 'ubuntu-latest'
     dependsOn: [  ]
@@ -71,6 +71,18 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Restore Compile --skip'
+      - job: Pack
+        displayName: '📦 Pack'
+        dependsOn: [ Compile ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Pack --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Nuget
+              pathtoPublish: 'Nuget'
       - job: Test
         displayName: '🚦 Test'
         dependsOn: [ Compile ]
@@ -95,26 +107,14 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Report --skip'
-      - job: Pack
-        displayName: '📦 Pack'
+      - job: Performance
+        displayName: '⏲️ Performance'
         dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Pack --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
-      - job: CI
-        displayName: '☁️ CI'
-        dependsOn: [ Pack, Report ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'CI --skip'
+              arguments: 'Performance --skip'
   - stage: macOS_latest
     displayName: 'macOS-latest'
     dependsOn: [  ]
@@ -129,6 +129,18 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Restore Compile --skip'
+      - job: Pack
+        displayName: '📦 Pack'
+        dependsOn: [ Compile ]
+        steps:
+          - task: PowerShell@2
+            inputs:
+              filePath: 'build.ps1'
+              arguments: 'Pack --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Nuget
+              pathtoPublish: 'Nuget'
       - job: Test
         displayName: '🚦 Test'
         dependsOn: [ Compile ]
@@ -153,23 +165,11 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Report --skip'
-      - job: Pack
-        displayName: '📦 Pack'
+      - job: Performance
+        displayName: '⏲️ Performance'
         dependsOn: [ Compile ]
         steps:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Pack --skip'
-          - task: PublishBuildArtifacts@1
-            inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
-      - job: CI
-        displayName: '☁️ CI'
-        dependsOn: [ Pack, Report ]
-        steps:
-          - task: PowerShell@2
-            inputs:
-              filePath: 'build.ps1'
-              arguments: 'CI --skip'
+              arguments: 'Performance --skip'

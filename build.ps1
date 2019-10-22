@@ -23,7 +23,8 @@ $BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
 $TempDirectory = "$PSScriptRoot\\.tmp"
 
 $DotNetGlobalFile = "$PSScriptRoot\\global.json"
-$DotNetInstallUrl = "https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1"
+$DotNetInstallUrlPowershell = "https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1"
+$DotNetInstallUrlBash = "https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
 $DotNetChannel = "Current"
 
 $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 1
@@ -51,27 +52,55 @@ if (Test-Path $DotNetGlobalFile) {
 if((Get-Variable IsWindows -ErrorAction SilentlyContinue) -eq $null){
 	$DotNetSuffix = "win";
 	$DotNetExtension = ".exe";
+	$DotNetInstallUrl = $DotNetInstallUrlPowershell;
+	$DotNetInstallExtension = "ps1";
 }
 else{
 	$DotNetSuffix = if($IsWindows -eq $false -or $IsWindows -eq $null){"unix"} else{"win"};
 	$DotNetExtension = if($IsWindows -eq $false -or $IsWindows -eq $null){""} else{".exe"};
+	$DotNetInstallUrl =  if($IsWindows -eq $false -or $IsWindows -eq $null){$DotNetInstallUrlBash} else{$DotNetInstallUrlPowershell};
+	$DotNetInstallExtension = if($IsWindows -eq $false -or $IsWindows -eq $null){"sh"} else{"ps1"};
 }
 
 $DotNetDirectory = "$TempDirectory\dotnet-$DotNetSuffix"
 $DotNetVersionDirectory = "$DotNetDirectory\sdk\$DotNetVersion"
 $env:DOTNET_EXE = "$DotNetDirectory\dotnet$DotNetExtension"
 
-if(!(Test-Path $DotNetVersionDirectory)){
-	# Download install script
-	$DotNetInstallFile = "$TempDirectory\dotnet-install.ps1"
-    New-Item -ItemType Directory -Path $TempDirectory | Out-Null
-	(New-Object System.Net.WebClient).DownloadFile($DotNetInstallUrl, $DotNetInstallFile)
+if ($null -ne (Get-Command "dotnet" -ErrorAction SilentlyContinue) -and `
+     (!(Test-Path variable:DotNetVersion) -or $(& dotnet --version | Select-Object -First 1) -eq $DotNetVersion)) {
+    $env:DOTNET_EXE = (Get-Command "dotnet").Path
+}
+else{
+	if(!(Test-Path $DotNetVersionDirectory)){
+		# Download install script
+		$DotNetInstallFile = "$TempDirectory\dotnet-install.$DotNetInstallExtension"
+		New-Item -ItemType Directory -Path $TempDirectory | Out-Null
+		(New-Object System.Net.WebClient).DownloadFile($DotNetInstallUrl, $DotNetInstallFile)
 
-	# Install by channel or version
-	if (!(Test-Path variable:DotNetVersion)) {
-		ExecSafe { & $DotNetInstallFile -InstallDir $DotNetDirectory -Channel $DotNetChannel -NoPath }
-	} else {
-		ExecSafe { & $DotNetInstallFile -InstallDir $DotNetDirectory -Version $DotNetVersion -NoPath }
+		# Install by channel or version
+		if (!(Test-Path variable:DotNetVersion)) {
+			if($DotNetInstallExtension -eq "ps1"){
+				ExecSafe { & $DotNetInstallFile -InstallDir $DotNetDirectory -Channel $DotNetChannel -NoPath }
+			}
+			elseif ($DotNetInstallExtension -eq "sh"){
+				ExecSafe { & "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" --channel "$DOTNET_CHANNEL" --no-path }
+			}
+			else{
+				throw "Unknown install extension";
+			}
+		} else {
+
+			if($DotNetInstallExtension -eq "ps1"){
+				ExecSafe { & $DotNetInstallFile -InstallDir $DotNetDirectory -Version $DotNetVersion -NoPath }
+			}
+			elseif ($DotNetInstallExtension -eq "sh"){
+				ExecSafe { &  "$DOTNET_INSTALL_FILE" --install-dir "$DOTNET_DIRECTORY" --version "$DOTNET_VERSION" --no-path }
+			}
+			else{
+				throw "Unknown install extension";
+			}
+
+		}
 	}
 }
 
