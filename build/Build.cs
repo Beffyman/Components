@@ -50,8 +50,8 @@ public partial class Build : NukeBuild
 	AbsolutePath BenchmarksProjectArtifactsDirectory => BenchmarksProjectDirectory / "BenchmarkDotNet.Artifacts";
 
 	AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
-	AbsolutePath NugetArtifactsDirectory => ArtifactsDirectory / "Nuget";
-	AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "Tests";
+	//AbsolutePath NugetArtifactsDirectory => ArtifactsDirectory / "Nuget";
+	//AbsolutePath TestArtifactsDirectory => ArtifactsDirectory / "Tests";
 	AbsolutePath PerformanceArtifactsDirectory => ArtifactsDirectory / "Performance";
 
 
@@ -102,10 +102,12 @@ public partial class Build : NukeBuild
 	Target Pack => _ => _
 		.DependsOn(Label)
 		.DependsOn(Compile)
-		.Produces(NugetArtifactsDirectory / "*.nupkg", NugetArtifactsDirectory / "*.snupkg")
+		.Produces(ArtifactsDirectory / "*nupkg")
+		.Produces(ArtifactsDirectory / "*snupkg")
 		.Executes(() =>
 		{
-			EnsureExistingDirectory(NugetArtifactsDirectory);
+			//EnsureExistingDirectory(NugetArtifactsDirectory);
+			EnsureExistingDirectory(ArtifactsDirectory);
 
 			DotNetPack(s => s.SetProject(Solution)
 					.SetVersion(GitVersion.NuGetVersionV2)
@@ -116,27 +118,33 @@ public partial class Build : NukeBuild
 					.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
 					.SetFileVersion(GitVersion.GetNormalizedFileVersion())
 					.SetInformationalVersion(GitVersion.InformationalVersion)
-					.SetOutputDirectory(NugetArtifactsDirectory));
+					.SetOutputDirectory(ArtifactsDirectory));
 		});
 
 
 	Target Test => _ => _
 		.After(Label)
 		.DependsOn(Compile)
-		.Produces(TestArtifactsDirectory / "*.trx", TestArtifactsDirectory / CodeCoverageFile)
+		.Produces(ArtifactsDirectory / "*.trx")
+		.Produces(ArtifactsDirectory / CodeCoverageFile)
+		//.Produces(TestArtifactsDirectory / "*.trx")
+		//.Produces(TestArtifactsDirectory / CodeCoverageFile)
 		.Executes(() =>
 		{
-			EnsureExistingDirectory(TestArtifactsDirectory);
+			//EnsureExistingDirectory(TestArtifactsDirectory);
+			EnsureExistingDirectory(ArtifactsDirectory);
 
 			TestsDirectory.GlobFiles("**/*.csproj").ForEach(csproj =>
 			{
 				var projectName = Path.GetFileNameWithoutExtension(csproj);
-				AbsolutePath coverageOutput = TestArtifactsDirectory / $"{projectName}";
+				AbsolutePath coverageOutput = ArtifactsDirectory / $"{projectName}";
+				//AbsolutePath coverageOutput = TestArtifactsDirectory / $"{projectName}";
 
 				DotNetTest(s => s.SetConfiguration(Configuration)
 					.SetNoBuild(AzurePipelines.Instance == null)
 					.SetLogger("trx")
-					.SetResultsDirectory(TestArtifactsDirectory)
+					//.SetResultsDirectory(TestArtifactsDirectory)
+					.SetResultsDirectory(ArtifactsDirectory)
 					.SetArgumentConfigurator(arguments =>
 						arguments.Add("/p:CollectCoverage={0}", "true")
 								.Add("/p:CoverletOutput={0}/", coverageOutput)
@@ -148,6 +156,12 @@ public partial class Build : NukeBuild
 
 				FileExists(coverageOutput);
 			});
+
+			//var trxFiles = TestArtifactsDirectory.GlobFiles("*.trx").Select(x => new FileInfo(x));
+			var trxFiles = ArtifactsDirectory.GlobFiles("*.trx").Select(x => new FileInfo(x));
+
+			AzurePipelines.Instance?.PublishAzureDevOpsTestResults(trxFiles, AzurePipelines.Instance?.BuildNumber, mergeResults: true);
+
 		});
 
 	Target Report => _ => _
@@ -157,7 +171,8 @@ public partial class Build : NukeBuild
 		.Executes(() =>
 		{
 			var coverageFiles = TestsDirectory.GlobFiles("**/*.csproj")
-				.Select(csproj => (string)(TestArtifactsDirectory / $"{Path.GetFileNameWithoutExtension(csproj)}"))
+				//.Select(csproj => (string)(TestArtifactsDirectory / $"{Path.GetFileNameWithoutExtension(csproj)}"))
+				.Select(csproj => (string)(ArtifactsDirectory / $"{Path.GetFileNameWithoutExtension(csproj)}"))
 				.ToArray();
 
 			foreach (var coverageFolder in coverageFiles)
@@ -167,6 +182,7 @@ public partial class Build : NukeBuild
 
 				ReportGenerator(s => s.SetReports(coverage)
 							.SetTargetDirectory(reportFolder)
+							.SetFramework("netcoreapp3.0")
 							.SetTag(GitVersion.NuGetVersionV2)
 							.SetReportTypes(ReportTypes.HtmlInline_AzurePipelines_Dark));
 			}

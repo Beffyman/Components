@@ -17,16 +17,10 @@ namespace Beffyman.Components.Tests
 		[Fact]
 		public void EntityOperations()
 		{
-			var entity = Manager.CreateEntity();
-
 			Assert.Empty(Manager.Entities);
-			Manager.Update();
+			var entity = Manager.CreateEntity();
 			Assert.Single(Manager.Entities);
-
 			Manager.DestroyEntity(entity);
-
-			Assert.Single(Manager.Entities);
-			Manager.Update();
 			Assert.Empty(Manager.Entities);
 		}
 
@@ -34,7 +28,6 @@ namespace Beffyman.Components.Tests
 		public void ComponentOperations()
 		{
 			var entity = Manager.CreateEntity();
-			Manager.Update();
 
 			Assert.Null(Manager.GetComponent<Transform>(entity));
 			Assert.False(Manager.HasComponent<Transform>(entity));

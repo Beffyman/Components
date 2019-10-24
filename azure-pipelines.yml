@@ -23,8 +23,8 @@ stages:
               arguments: 'Label Pack --skip'
           - task: PublishBuildArtifacts@1
             inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
+              artifactName: artifacts
+              pathtoPublish: 'artifacts'
       - job: Report
         displayName: '📄 Report'
         dependsOn: [ Compile ]
@@ -65,8 +65,8 @@ stages:
               arguments: 'Label Pack --skip'
           - task: PublishBuildArtifacts@1
             inputs:
-              artifactName: Nuget
-              pathtoPublish: 'Nuget'
+              artifactName: artifacts
+              pathtoPublish: 'artifacts'
       - job: Report
         displayName: '📄 Report'
         dependsOn: [ Compile ]
