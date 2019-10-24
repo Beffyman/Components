@@ -12,7 +12,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Restore Compile --skip'
+              arguments: 'Restore Label Compile --skip'
       - job: Pack
         displayName: '📦 Pack'
         dependsOn: [ Compile ]
@@ -20,7 +20,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Pack --skip'
+              arguments: 'Label Pack --skip'
           - task: PublishBuildArtifacts@1
             inputs:
               artifactName: Nuget
@@ -32,7 +32,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Test Report --skip'
+              arguments: 'Test Label Report --skip'
       - job: Performance
         displayName: '⏲️ Performance'
         dependsOn: [ Compile ]
@@ -40,7 +40,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Performance --skip'
+              arguments: 'Label Performance --skip'
   - stage: ubuntu_latest
     displayName: 'ubuntu-latest'
     dependsOn: [  ]
@@ -54,7 +54,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Restore Compile --skip'
+              arguments: 'Restore Label Compile --skip'
       - job: Pack
         displayName: '📦 Pack'
         dependsOn: [ Compile ]
@@ -62,7 +62,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Pack --skip'
+              arguments: 'Label Pack --skip'
           - task: PublishBuildArtifacts@1
             inputs:
               artifactName: Nuget
@@ -74,7 +74,7 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Test Report --skip'
+              arguments: 'Test Label Report --skip'
       - job: Performance
         displayName: '⏲️ Performance'
         dependsOn: [ Compile ]
@@ -82,4 +82,4 @@ stages:
           - task: PowerShell@2
             inputs:
               filePath: 'build.ps1'
-              arguments: 'Performance --skip'
+              arguments: 'Label Performance --skip'

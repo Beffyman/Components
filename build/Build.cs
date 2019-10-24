@@ -27,7 +27,7 @@ using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 	//AzurePipelinesImage.MacOsLatest,
 	InvokedTargets = new[] { nameof(Pack), nameof(Report), nameof(Performance) },
 	ExcludedTargets = new string[] { nameof(Clean) },
-	NonEntryTargets = new string[] { nameof(Restore), nameof(Test) })]
+	NonEntryTargets = new string[] { nameof(Restore), nameof(Test), nameof(Label) })]
 public partial class Build : NukeBuild
 {
 	public static int Main() => Execute<Build>(x => x.Compile);
@@ -78,6 +78,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Restore => _ => _
+		.After(Label)
 		.Executes(() =>
 		{
 			DotNetRestore(s => s
@@ -85,6 +86,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Compile => _ => _
+		.DependsOn(Label)
 		.DependsOn(Restore)
 		.Executes(() =>
 		{
@@ -98,6 +100,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Pack => _ => _
+		.DependsOn(Label)
 		.DependsOn(Compile)
 		.Produces(NugetArtifactsDirectory / "*.nupkg", NugetArtifactsDirectory / "*.snupkg")
 		.Executes(() =>
@@ -118,6 +121,7 @@ public partial class Build : NukeBuild
 
 
 	Target Test => _ => _
+		.After(Label)
 		.DependsOn(Compile)
 		.Produces(TestArtifactsDirectory / "*.trx", TestArtifactsDirectory / CodeCoverageFile)
 		.Executes(() =>
@@ -147,6 +151,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Report => _ => _
+		.DependsOn(Label)
 		.DependsOn(Compile)
 		.DependsOn(Test)
 		.Executes(() =>
@@ -168,6 +173,7 @@ public partial class Build : NukeBuild
 		});
 
 	Target Performance => _ => _
+		.DependsOn(Label)
 		.DependsOn(Clean)
 		.DependsOn(Compile)
 		.Executes(() =>
