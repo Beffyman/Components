@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using Beffyman.Components.Internal;
 
 namespace Beffyman.Components.Manager
 {
@@ -74,7 +75,7 @@ namespace Beffyman.Components.Manager
 			var componentDictionary = _components.GetOrAdd(type, CreateComponentDictionary);
 			return componentDictionary.GetOrAdd(entity, CreateComponent);
 
-			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>();
+			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
 			{
 				return Activator.CreateInstance(type) as IComponent;
@@ -99,12 +100,74 @@ namespace Beffyman.Components.Manager
 
 			return default(T);
 
-			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>();
+			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
 			{
 				return new T();
 			}
 		}
+
+
+
+		public T AddComponent<T>(in Entity entity, T addedComponent, bool overwrite = false) where T : class, IComponent, new()
+		{
+			if (entity == null)
+			{
+				return default;
+			}
+
+			var type = typeof(T);
+			var componentDictionary = _components.GetOrAdd(type, CreateComponentDictionary);
+
+			if (componentDictionary.TryGetValue(entity, out IComponent component))
+			{
+				if (component is T typedComponent)
+				{
+					if (overwrite)
+					{
+						if (componentDictionary.TryRemove(entity, out _))
+						{
+							if (componentDictionary.TryAdd(entity, addedComponent))
+							{
+								return addedComponent;
+							}
+							else
+							{
+								return AddComponent(entity, addedComponent, overwrite);
+							}
+						}
+						else
+						{
+							return AddComponent(entity, addedComponent, overwrite);
+						}
+					}
+					else
+					{
+						return typedComponent;
+					}
+				}
+			}
+			else
+			{
+				if (componentDictionary.TryAdd(entity, addedComponent))
+				{
+					return addedComponent;
+				}
+				else
+				{
+					return AddComponent(entity, addedComponent, overwrite);
+				}
+			}
+
+			return default(T);
+
+			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
+			IComponent CreateComponent(Entity e)
+			{
+				return addedComponent;
+			}
+		}
+
 
 		public bool RemoveComponent<T>(in Entity entity) where T : class, IComponent, new() => RemoveComponent(entity, typeof(T));
 		public bool RemoveComponent(in Entity entity, Type type)
@@ -147,6 +210,16 @@ namespace Beffyman.Components.Manager
 					yield return component;
 				}
 			}
+		}
+
+		private void DestroyComponents()
+		{
+			foreach (var typedComponents in _components)
+			{
+				typedComponents.Value.Clear();
+			}
+
+			_components.Clear();
 		}
 	}
 }

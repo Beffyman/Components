@@ -1,6 +1,9 @@
 using System;
+using System.Numerics;
+using System.Reflection;
 using Beffyman.Components.Manager;
 using Beffyman.Components.Tests.Components;
+using Beffyman.Components.Tests.Systems;
 using Xunit;
 
 namespace Beffyman.Components.Tests
@@ -8,10 +11,14 @@ namespace Beffyman.Components.Tests
 	public class EntityManagerTests
 	{
 		private readonly EntityManager Manager;
+		private const float DeltaTime = (1f / 60f);
 
 		public EntityManagerTests()
 		{
-			Manager = new EntityManager();
+			Manager = new EntityManager(new EntityManagerOptions
+			{
+				ComponentSystemTypes = new Type[] { typeof(GravitySystem), typeof(TransformRigidBodySystem) }
+			});
 		}
 
 		[Fact]
@@ -47,6 +54,47 @@ namespace Beffyman.Components.Tests
 			Manager.RemoveComponent<Transform>(entity);
 
 			Assert.Empty(Manager.GetComponents(entity));
+
+			var transformCustom = Manager.AddComponent(entity, new Transform
+			{
+				Rotation = 50f
+			});
+
+			var transformCustom2 = Manager.AddComponent(entity, new Transform
+			{
+				Rotation = 100f
+			}, false);
+
+			Assert.Equal(transformCustom, transformCustom2);
+
+			var transformCustom3 = Manager.AddComponent(entity, new Transform
+			{
+				Rotation = 75f
+			}, true);
+
+			Assert.NotEqual(transformCustom, transformCustom3);
+
+			var getComponent = Manager.GetComponent<Transform>(entity);
+
+			Assert.Equal(getComponent, transformCustom3);
+			Assert.NotEqual(getComponent, transformCustom);
 		}
+
+		[Fact]
+		public void SystemOperations()
+		{
+			var entity = Manager.CreateEntity();
+			var transform = Manager.AddComponent<Transform>(entity);
+			var rigidBody = Manager.AddComponent<RigidBody>(entity);
+
+			var update = new UpdateStep(DeltaTime);
+
+			Manager.Update(update);
+
+			Assert.NotEqual(Vector2.Zero, rigidBody.Velocity);
+
+		}
+
+
 	}
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using Beffyman.Components.Internal;
 using Beffyman.Components.Manager;
 
 namespace Beffyman.Components
@@ -8,6 +10,13 @@ namespace Beffyman.Components
 	/// </summary>
 	public class Entity
 	{
+		private static int nextId = 0;
+
+		/// <summary>
+		/// Unique Id of the entity, this may be reused though if a previous entity was destroyed
+		/// </summary>
+		public uint Id { get; } = unchecked((uint)Interlocked.Increment(ref nextId));
+
 		/// <summary>
 		/// Manager that controls this <see cref="Entity"/>
 		/// </summary>

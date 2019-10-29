@@ -30,5 +30,10 @@ namespace Beffyman.Components.Manager
 			RemoveAllComponents(entity);
 			return _entities.TryRemove(entity);
 		}
+
+		private void DestroyEntities()
+		{
+			_entities.Clear();
+		}
 	}
 }

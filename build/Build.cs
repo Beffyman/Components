@@ -93,8 +93,8 @@ public partial class Build : NukeBuild
 			DotNetBuild(s => s
 				.SetProjectFile(Solution)
 				.SetConfiguration(Configuration)
-				.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
-				.SetFileVersion(GitVersion.GetNormalizedFileVersion())
+				.SetAssemblyVersion(GitVersion.AssemblySemVer)
+				.SetFileVersion(GitVersion.AssemblySemFileVer)
 				.SetInformationalVersion(GitVersion.InformationalVersion)
 				.EnableNoRestore());
 		});
@@ -115,8 +115,8 @@ public partial class Build : NukeBuild
 					.EnableIncludeSource()
 					.EnableIncludeSymbols()
 					.SetConfiguration(Configuration)
-					.SetAssemblyVersion(GitVersion.GetNormalizedAssemblyVersion())
-					.SetFileVersion(GitVersion.GetNormalizedFileVersion())
+					.SetAssemblyVersion(GitVersion.AssemblySemVer)
+					.SetFileVersion(GitVersion.AssemblySemFileVer)
 					.SetInformationalVersion(GitVersion.InformationalVersion)
 					.SetOutputDirectory(ArtifactsDirectory));
 		});
