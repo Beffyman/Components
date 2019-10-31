@@ -81,7 +81,6 @@ namespace Beffyman.Components.Systems
 		protected virtual void OnDestroy() { }
 		protected virtual void OnStart() { }
 		protected virtual void OnStop() { }
-		protected abstract void OnUpdate(in UpdateStep step);
 
 		internal virtual void Load(EntityManager manager)
 		{

@@ -11,6 +11,8 @@ namespace Beffyman.Components.Manager
 {
 	public partial class EntityManager
 	{
+#warning Can probably utilize ArrayPool somewhere...
+
 		private readonly InfiniteScaleObjectPool<Entity> _entityPool;
 		private readonly ConcurrentHashSet<Entity> _entities;
 

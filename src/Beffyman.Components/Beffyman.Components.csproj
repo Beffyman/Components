@@ -1,13 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<!--<TargetFrameworks>netstandard2.0;netstandard2.1;netcoreapp3.0</TargetFrameworks>-->
+		<TargetFramework>netcoreapp3.0</TargetFramework>
 		<IsPackable>True</IsPackable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="ConcurrentHashSet" Version="1.1.0" />
-	  <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="3.0.0" />
+		<PackageReference Include="ConcurrentHashSet" Version="1.1.0" />
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="3.0.0" />
+		<PackageReference Include="System.Memory" Version="4.5.3" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
 	</ItemGroup>
 
 </Project>
