@@ -6,10 +6,10 @@ namespace Beffyman.Components.Manager
 {
 	public readonly ref struct UpdateStep
 	{
-		public readonly float DeltaTime;
+		public readonly double DeltaTime;
 
 
-		public UpdateStep(float deltaTime)
+		public UpdateStep(double deltaTime)
 		{
 			DeltaTime = deltaTime;
 		}

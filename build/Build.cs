@@ -158,9 +158,8 @@ public partial class Build : NukeBuild
 			});
 
 			//var trxFiles = TestArtifactsDirectory.GlobFiles("*.trx").Select(x => new FileInfo(x));
-			var trxFiles = ArtifactsDirectory.GlobFiles("*.trx").Select(x => new FileInfo(x));
 
-			AzurePipelines.Instance?.PublishAzureDevOpsTestResults(trxFiles, AzurePipelines.Instance?.BuildNumber, mergeResults: true);
+			AzurePipelines.Instance?.PublishTestResults(ArtifactsDirectory.GlobFiles("*.trx").Select(x => x.ToString()), AzurePipelines.Instance?.BuildNumber, mergeResults: true);
 
 		});
 

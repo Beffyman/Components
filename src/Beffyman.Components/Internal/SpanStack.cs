@@ -62,12 +62,24 @@ namespace Beffyman.Components.Internal
 
 		private void Resize()
 		{
-			int newSize = Pointers.Length * 2;
+			int newSize;
+			if (Pointers.IsEmpty)
+			{
+				newSize = 8;
+			}
+			else
+			{
+				newSize = Pointers.Length * 2;
+			}
+
 			var oldBackingArray = _backingArray;
 			_backingArray = ArrayPool<T>.Shared.Rent(newSize);
 			var newSpan = _backingArray.AsSpan();
 			Pointers.CopyTo(newSpan);
-			ArrayPool<T>.Shared.Return(oldBackingArray);
+			if (oldBackingArray != null)
+			{
+				ArrayPool<T>.Shared.Return(oldBackingArray);
+			}
 			Pointers = newSpan;
 		}
 

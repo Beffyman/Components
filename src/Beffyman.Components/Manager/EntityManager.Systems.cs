@@ -94,9 +94,9 @@ namespace Beffyman.Components.Manager
 			List<Type> orderedComponents = new List<Type>();
 
 			//Give a healthy length^2 until we throw an error in case of a after/before loop
-			int failurePoint = allComponentSystems.Length * allComponentSystems.Length;
+			int failurePoint = (allComponentSystems.Length + 1) * allComponentSystems.Length;
 			int attempts = 0;
-			while (allComponentSystems.Length != orderedComponents.Count)
+			while (systems.Count != 0)
 			{
 				attempts++;
 				if (attempts >= failurePoint)

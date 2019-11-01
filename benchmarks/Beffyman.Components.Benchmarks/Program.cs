@@ -9,7 +9,8 @@ namespace Beffyman.Components.Benchmarks
 		{
 			try
 			{
-				var summary = BenchmarkRunner.Run<EntityManagerJobs>();
+				var summary1 = BenchmarkRunner.Run<ComponentSystemBenchmarks>();
+				var summary2 = BenchmarkRunner.Run<JobComponentSystemBenchmarks>();
 			}
 			catch (Exception ex)
 			{

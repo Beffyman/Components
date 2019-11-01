@@ -9,15 +9,13 @@ namespace Beffyman.Components.Internal
 	{
 		public static ReadOnlySpan<byte> AsReadOnlySpan<T>(ref T val) where T : unmanaged
 		{
-			int typeSize = Marshal.SizeOf<T>();
-			ReadOnlySpan<T> valSpan = MemoryMarshal.CreateReadOnlySpan(ref val, typeSize);
+			ReadOnlySpan<T> valSpan = MemoryMarshal.CreateReadOnlySpan(ref val, sizeof(T));
 			return MemoryMarshal.Cast<T, byte>(valSpan);
 		}
 
 		public static Span<byte> AsSpan<T>(ref T val) where T : unmanaged
 		{
-			int typeSize = Marshal.SizeOf<T>();
-			Span<T> valSpan = MemoryMarshal.CreateSpan(ref val, typeSize);
+			Span<T> valSpan = MemoryMarshal.CreateSpan(ref val, sizeof(T));
 			return MemoryMarshal.Cast<T, byte>(valSpan);
 		}
 	}

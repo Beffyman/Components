@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Beffyman.Components.Benchmarks.Systems;
 using Beffyman.Components.Manager;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -10,19 +11,11 @@ using BenchmarkDotNet.Toolchains.DotNetCli;
 
 namespace Beffyman.Components.Benchmarks
 {
-	[Config(typeof(Config))]
+	[Config(typeof(DefaultConfig))]
 	[MemoryDiagnoser]
-	public class EntityManagerJobs
+	public class ComponentSystemBenchmarks
 	{
-		internal sealed class Config : ManualConfig
-		{
-			public Config()
-			{
-				var customToolchain = CsProjCoreToolchain.From(NetCoreAppSettings.NetCoreApp30.WithCustomDotNetCliPath(Environment.GetEnvironmentVariable("CUSTOM_SDK_PATH")));
-
-				Add(Job.Default.With(CoreRuntime.Core30).With(customToolchain));
-			}
-		}
+		private const float DeltaTime = (1f / 30f);
 
 		private EntityManager Manager;
 
@@ -34,9 +27,16 @@ namespace Beffyman.Components.Benchmarks
 		{
 			Manager = new EntityManager(new EntityManagerOptions
 			{
-				ComponentSystemAssemblies = new Assembly[] { typeof(EntityManagerJobs).Assembly },
-				Multithreading = MultiThreading
+				ComponentSystemTypes = new Type[] { typeof(DoWorkSystem) },
+				Multithreading = MultiThreading,
+				InitialPoolSize = 500
 			});
+
+			//Do a spin up to allocate shared resources
+			for (int i = 0; i < 10; i++)
+			{
+				Manager.Update(new UpdateStep(DeltaTime));
+			}
 		}
 
 		[IterationCleanup]
@@ -47,9 +47,12 @@ namespace Beffyman.Components.Benchmarks
 		}
 
 		[Benchmark]
-		public void SystemPerformance()
+		public void ComponentSystemAllocations()
 		{
-
+			for (int i = 0; i < 10000; i++)
+			{
+				Manager.Update(new UpdateStep(DeltaTime));
+			}
 		}
 	}
 }
