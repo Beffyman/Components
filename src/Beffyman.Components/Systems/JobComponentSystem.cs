@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -20,73 +21,63 @@ namespace Beffyman.Components.Systems
 		private Type[] NestedJobs;
 
 
+
 		//#error Figure out a way to have reduced allocation job queueing?
 		//#error Possiblty expose a Get method which pools the job?
 		//#error I don't think it's possible to use the structs as
 
-		protected unsafe void Schedule<T>(ref JobHandle<IntPtr> jobs, ref T job) where T : unmanaged, IJobForEach
+		protected void Schedule<T>(in T job) where T : unmanaged, IJobForEach
 		{
-			IntPtr ptr = Marshal.AllocHGlobal(sizeof(T));
-			Marshal.StructureToPtr(job, ptr, false);
+			void Handle(in T j)
+			{
+				j.Execute();
+			}
 
-			jobs.Jobs.Add(ptr);
+			int entityCount = Manager.Entities.Count;
+			int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
+			int batches = (int)Math.Ceiling((float)entityCount / batchSize);
+
+			//!? Wrapping the method group inside a lambda causes it to avoid an action allocation, DO NOT CHANGE THIS
+			for (int i = 0; i < batches; i++)
+			{
+				int start = i * batchSize;
+				int end = Math.Min(start + batchSize, entityCount);
+
+
+				_ = ThreadPool.UnsafeQueueUserWorkItem<T>((T j) =>
+				{
+					Handle(j);
+				}, job, true);
+			}
 		}
 
-		protected unsafe void Schedule<T, K>(ref JobHandle<IntPtr> jobs, ref T job) where T : unmanaged, IJobForEach<K>
-			where K : IComponent
-		{
-			IntPtr ptr = Marshal.AllocHGlobal(sizeof(T));
-			Marshal.StructureToPtr(job, ptr, false);
+		//protected void Schedule<T, TFirst>(in T job) where T : unmanaged, IJobForEach<TFirst>
+		//	where TFirst: IComponent
+		//{
+		//	void Handle<T,TFirst>(in T j) where T : unmanaged, IJobForEach<TFirst>
+		//	where TFirst : IComponent
+		//	{
+		//		Manager.GetComponent<TFirst>()
+		//		j.Execute();
+		//	}
 
-			jobs.Jobs.Add(ptr);
-		}
+		//	//!? Wrapping the method group inside a lambda causes it to avoid an action allocation, DO NOT CHANGE THIS
+		//	_ = ThreadPool.UnsafeQueueUserWorkItem<T>((T j) =>
+		//	{
+		//		Handle<T,TFirst>(j);
+		//	}, job, true);
+		//}
 
-		protected unsafe void Schedule<T, TFirst, TSecond>(ref JobHandle<IntPtr> jobs, ref T job) where T : unmanaged, IJobForEach<TFirst, TSecond>
-			where TFirst : IComponent
-			where TSecond : IComponent
-		{
-			IntPtr ptr = Marshal.AllocHGlobal(sizeof(T));
-			Marshal.StructureToPtr(job, ptr, false);
 
-			jobs.Jobs.Add(ptr);
-		}
-
-		protected unsafe void Schedule<T, TFirst, TSecond, TThird>(ref JobHandle<IntPtr> jobs, ref T job) where T : unmanaged, IJobForEach<TFirst, TSecond, TThird>
-			where TFirst : IComponent
-			where TSecond : IComponent
-			where TThird : IComponent
-		{
-			IntPtr ptr = Marshal.AllocHGlobal(sizeof(T));
-			Marshal.StructureToPtr(job, ptr, false);
-
-			jobs.Jobs.Add(ptr);
-		}
-
-		protected abstract ref JobHandle<IntPtr> OnUpdate(ref JobHandle<IntPtr> jobs, in UpdateStep step);
+		protected abstract ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step);
 
 		internal override void Update(in UpdateStep step)
 		{
-			JobHandle<IntPtr> jobs = new JobHandle<IntPtr>();
+			JobHandle jobs = new JobHandle();
 
-			try
-			{
-				OnUpdate(ref jobs, step);
+			OnUpdate(ref jobs, step);
 
-				//Do Work for the jobs here, queue up threads and then sync them up
-			}
-			finally
-			{
-				//Free all the pointers for the jobs used
-				FreeAllJobPointers(ref jobs);
-			}
-		}
-
-		private void FreeAllJobPointers(ref JobHandle<IntPtr> jobs)
-		{
-			for (int i = 0; i < jobs.Jobs.Length; i++)
-			{
-				Marshal.FreeHGlobal(jobs.Jobs[i]);
-			}
+			//Do Work for the jobs here, queue up threads and then sync them up
 		}
 
 		internal override void Load(EntityManager manager)

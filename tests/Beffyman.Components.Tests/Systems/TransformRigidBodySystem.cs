@@ -11,11 +11,13 @@ namespace Beffyman.Components.Tests.Systems
 {
 	public sealed class TransformRigidBodySystem : JobComponentSystem
 	{
-		protected override void OnUpdate(ref JobHandle<IntPtr> jobs, in UpdateStep step)
+		protected override ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step)
 		{
 			var job = new TransformRigidBodyJob((float)step.DeltaTime);
 
-			Schedule<TransformRigidBodyJob, Transform, RigidBody>(ref jobs, ref job);
+			//Schedule(job);
+
+			return ref jobs;
 		}
 
 		private readonly struct TransformRigidBodyJob : IJobForEach<Transform, RigidBody>

@@ -9,25 +9,24 @@ namespace Beffyman.Components.Systems
 {
 	public abstract partial class JobComponentSystem
 	{
-		/// <summary>
-		/// Keeps track of jobs scheduled within this frame in this component
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		[StructLayout(LayoutKind.Sequential)]
-		protected ref struct JobHandle<T> where T : unmanaged
+		protected ref struct JobHandle
 		{
-			internal SpanStack<T> Jobs;
 
-			public JobHandle(in Span<T> jobs)
-			{
-				Jobs = new SpanStack<T>(jobs);
-			}
 		}
+
 
 		protected interface IJobForEach
 		{
 			void Execute();
 		}
+
+
+		//private static void Handle<T>(T job)
+		//{
+
+		//}
+
+
 
 		protected interface IJobForEach<T>
 			where T : IComponent
@@ -35,12 +34,18 @@ namespace Beffyman.Components.Systems
 			void Execute(in T arg);
 		}
 
+
+
+
 		protected interface IJobForEach<TFirst, TSecond>
 			where TFirst : IComponent
 			where TSecond : IComponent
 		{
 			void Execute(in TFirst arg1, in TSecond arg2);
 		}
+
+
+
 
 		protected interface IJobForEach<TFirst, TSecond, TThird>
 			where TFirst : IComponent

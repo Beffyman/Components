@@ -8,11 +8,13 @@ namespace Beffyman.Components.Benchmarks.Systems
 {
 	public class DoWorkJobSystem : JobComponentSystem
 	{
-		protected override void OnUpdate(ref JobHandle<IntPtr> jobs, in UpdateStep step)
+		protected override ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step)
 		{
 			var job = new DoWorkJob();
 
-			Schedule(ref jobs, ref job);
+			Schedule(job);
+
+			return ref jobs;
 		}
 
 		protected readonly struct DoWorkJob : IJobForEach

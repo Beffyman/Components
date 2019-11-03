@@ -28,13 +28,24 @@
 	<!--Define Analyzers -->
 	<ItemGroup Condition="'$(IsBuildProject)' != 'true' And '$(IsTestable)' != 'true'">
 
+
 		<!--Enable when adding new stuff to minimize heap allocations-->
 		<PackageReference Include="ClrHeapAllocationAnalyzer" Version="1.0.0.9">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>
 
-		<PackageReference Include="ErrorProne.NET.Structs" Version="0.1.2">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.CodeAnalysis.PerformanceSensitiveAnalyzers" Version="3.0.0-beta2.19531.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Update="ErrorProne.NET.Structs" Version="0.2.0-beta.7">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 		</PackageReference>

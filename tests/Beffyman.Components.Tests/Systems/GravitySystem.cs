@@ -13,11 +13,13 @@ namespace Beffyman.Components.Tests.Systems
 	{
 		public Vector2 Gravity { get; set; }
 
-		protected override void OnUpdate(ref JobHandle<IntPtr> jobs, in UpdateStep step)
+		protected override ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step)
 		{
 			var job = new GravityJob(Gravity);
 
-			Schedule<GravityJob, Transform, RigidBody>(ref jobs, ref job);
+			Schedule(job);
+
+			return ref jobs;
 		}
 
 		private readonly struct GravityJob : IJobForEach<Transform, RigidBody>
