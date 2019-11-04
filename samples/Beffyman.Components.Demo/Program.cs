@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
+using Beffyman.Components.Demo.Components;
 using Beffyman.Components.Manager;
 
 namespace Beffyman.Components.Demo
@@ -21,6 +23,12 @@ namespace Beffyman.Components.Demo
 				InitialPoolSize = 500
 			});
 
+			for (int i = 0; i < 5000; i++)
+			{
+				var entity = manager.CreateEntity();
+				entity.AddComponent<TrackerComponent>();
+			}
+
 			while (true)
 			{
 				deltaTime = timer.ElapsedTicks * _nanosecPerTick * 1e-9;
@@ -30,7 +38,7 @@ namespace Beffyman.Components.Demo
 				if (fpsTimerAcc > fpsTimer)
 				{
 					fpsTimerAcc = 0;
-					Console.WriteLine($"FPS: {(1d / deltaTime).ToString()}");
+					Console.WriteLine($"FPS: {(1d / deltaTime).ToString(CultureInfo.CurrentCulture)}");
 				}
 
 				manager.Update(new UpdateStep(deltaTime));

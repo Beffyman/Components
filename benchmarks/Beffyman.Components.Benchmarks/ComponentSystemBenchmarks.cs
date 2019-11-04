@@ -15,8 +15,6 @@ namespace Beffyman.Components.Benchmarks
 	[MemoryDiagnoser]
 	public class ComponentSystemBenchmarks
 	{
-		private const float DeltaTime = (1f / 30f);
-
 		private EntityManager Manager;
 
 		[Params(false, true)]
@@ -32,10 +30,15 @@ namespace Beffyman.Components.Benchmarks
 				InitialPoolSize = 500
 			});
 
-			//Do a spin up to allocate shared resources
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < DefaultConfig.PREPARE_ENTITIES; i++)
 			{
-				Manager.Update(new UpdateStep(DeltaTime));
+				Manager.CreateEntity();
+			}
+
+			//Do a spin up to allocate shared resources
+			for (int i = 0; i < DefaultConfig.PREPARE_LOOPS; i++)
+			{
+				Manager.Update(new UpdateStep(DefaultConfig.DELTATIME));
 			}
 		}
 
@@ -49,9 +52,9 @@ namespace Beffyman.Components.Benchmarks
 		[Benchmark]
 		public void ComponentSystemAllocations()
 		{
-			for (int i = 0; i < 10000; i++)
+			for (int i = 0; i < DefaultConfig.TEST_LOOPS; i++)
 			{
-				Manager.Update(new UpdateStep(DeltaTime));
+				Manager.Update(new UpdateStep(DefaultConfig.DELTATIME));
 			}
 		}
 	}

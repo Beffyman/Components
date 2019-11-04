@@ -8,7 +8,7 @@ namespace Beffyman.Components
 	/// <summary>
 	/// Object which can have components attached to it to participate in systems
 	/// </summary>
-	public class Entity
+	public partial class Entity
 	{
 		private static int nextId = 0;
 

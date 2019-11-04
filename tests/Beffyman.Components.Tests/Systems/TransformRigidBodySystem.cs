@@ -11,13 +11,12 @@ namespace Beffyman.Components.Tests.Systems
 {
 	public sealed class TransformRigidBodySystem : JobComponentSystem
 	{
-		protected override ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step)
+		protected override void OnUpdate(in UpdateStep step)
 		{
 			var job = new TransformRigidBodyJob((float)step.DeltaTime);
 
-			//Schedule(job);
+			Execute<TransformRigidBodyJob, Transform, RigidBody>(job);
 
-			return ref jobs;
 		}
 
 		private readonly struct TransformRigidBodyJob : IJobForEach<Transform, RigidBody>
@@ -28,7 +27,7 @@ namespace Beffyman.Components.Tests.Systems
 				DeltaTime = deltaTime;
 			}
 
-			public void Execute(in Transform transform, in RigidBody rigidBody)
+			public void Execute(Transform transform, RigidBody rigidBody)
 			{
 				transform.Position += rigidBody.Velocity * DeltaTime;
 

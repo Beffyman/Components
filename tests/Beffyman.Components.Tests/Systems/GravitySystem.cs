@@ -13,13 +13,13 @@ namespace Beffyman.Components.Tests.Systems
 	{
 		public Vector2 Gravity { get; set; }
 
-		protected override ref JobHandle OnUpdate(ref JobHandle jobs, in UpdateStep step)
+		protected override void OnUpdate(in UpdateStep step)
 		{
 			var job = new GravityJob(Gravity);
 
-			Schedule(job);
+			Execute<GravityJob, Transform, RigidBody>(job);
 
-			return ref jobs;
+
 		}
 
 		private readonly struct GravityJob : IJobForEach<Transform, RigidBody>
@@ -31,7 +31,7 @@ namespace Beffyman.Components.Tests.Systems
 				Gravity = gravity;
 			}
 
-			public void Execute(in Transform transform, in RigidBody rigidBody)
+			public void Execute(Transform transform, RigidBody rigidBody)
 			{
 				rigidBody.Force += (Gravity * rigidBody.Mass);
 			}

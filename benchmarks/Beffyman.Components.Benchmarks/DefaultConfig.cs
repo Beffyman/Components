@@ -11,6 +11,12 @@ namespace Beffyman.Components.Benchmarks
 {
 	internal sealed class DefaultConfig : ManualConfig
 	{
+
+		internal const float DELTATIME = (1f / 30f);
+		internal const int PREPARE_ENTITIES = 100;
+		internal const int PREPARE_LOOPS = 100;
+		internal const int TEST_LOOPS = 10000;
+
 		public DefaultConfig()
 		{
 			var customToolchain = CsProjCoreToolchain.From(NetCoreAppSettings.NetCoreApp30.WithCustomDotNetCliPath(Environment.GetEnvironmentVariable("CUSTOM_SDK_PATH")));

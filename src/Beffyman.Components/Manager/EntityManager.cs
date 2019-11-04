@@ -11,10 +11,11 @@ namespace Beffyman.Components.Manager
 {
 	public partial class EntityManager
 	{
-#warning Can probably utilize ArrayPool somewhere...
-
 		private readonly InfiniteScaleObjectPool<Entity> _entityPool;
-		private readonly ConcurrentHashSet<Entity> _entities;
+
+
+		internal ConcurrentHashSet<Entity> _entities { get; }
+		public IReadOnlyCollection<Entity> Entities => _entities;
 
 		private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Entity, IComponent>> _components;
 
@@ -24,7 +25,7 @@ namespace Beffyman.Components.Manager
 		private readonly ConcurrentHashSet<ArcheType> _archTypes;
 		private readonly ConcurrentDictionary<Entity, ArcheType> _entityArcheTypes;
 
-		public readonly EntityManagerOptions Options;
+		public EntityManagerOptions Options { get; }
 
 		private bool _firstUpdate = true;
 

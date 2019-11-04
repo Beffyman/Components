@@ -5,6 +5,7 @@ using System.Linq;
 using Beffyman.Components.Systems;
 using System.Reflection;
 using Beffyman.Components.Internal;
+using System.Threading.Tasks;
 
 namespace Beffyman.Components.Manager
 {
@@ -17,7 +18,7 @@ namespace Beffyman.Components.Manager
 			//If types were provided, prioritize those, unless assemblies was also provided, then combine
 
 			Type[] allComponentSystems = null;
-			Assembly[] assemblies = Options.ComponentSystemAssemblies;
+			IEnumerable<Assembly> assemblies = Options.ComponentSystemAssemblies;
 			if (assemblies == null && Options.ComponentSystemTypes == null)
 			{
 				assemblies = new Assembly[] { Assembly.GetEntryAssembly(), Assembly.GetExecutingAssembly(), Assembly.GetCallingAssembly() };
@@ -180,7 +181,7 @@ namespace Beffyman.Components.Manager
 			return componentSystems;
 		}
 
-		private void UpdateSystems(UpdateStep step)
+		private void UpdateSystems(in UpdateStep step)
 		{
 			for (int i = 0; i < _componentSystems.Length; i++)
 			{

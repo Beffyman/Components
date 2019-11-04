@@ -7,7 +7,6 @@ namespace Beffyman.Components.Manager
 {
 	public partial class EntityManager
 	{
-		public IReadOnlyCollection<Entity> Entities => _entities;
 
 		public Entity CreateEntity()
 		{

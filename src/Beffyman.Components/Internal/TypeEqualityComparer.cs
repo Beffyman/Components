@@ -10,7 +10,7 @@ namespace Beffyman.Components.Internal
 
 		public bool Equals(Type x, Type y)
 		{
-			return x.GUID == y.GUID;
+			return x.Equals(y);
 		}
 
 		public int GetHashCode(Type obj)

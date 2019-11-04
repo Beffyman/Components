@@ -1,50 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using Beffyman.Components.Internal;
-
-namespace Beffyman.Components.Systems
+﻿namespace Beffyman.Components.Systems
 {
 	public abstract partial class JobComponentSystem
 	{
-		protected ref struct JobHandle
-		{
-
-		}
-
-
+#warning What point even is there to this type of job?  Will probably remove it later
 		protected interface IJobForEach
 		{
 			void Execute();
 		}
 
 
-		//private static void Handle<T>(T job)
-		//{
-
-		//}
-
-
-
 		protected interface IJobForEach<T>
 			where T : IComponent
 		{
-			void Execute(in T arg);
+			void Execute(T arg);
 		}
-
-
 
 
 		protected interface IJobForEach<TFirst, TSecond>
 			where TFirst : IComponent
 			where TSecond : IComponent
 		{
-			void Execute(in TFirst arg1, in TSecond arg2);
+			void Execute(TFirst arg1, TSecond arg2);
 		}
-
-
 
 
 		protected interface IJobForEach<TFirst, TSecond, TThird>
@@ -52,7 +29,7 @@ namespace Beffyman.Components.Systems
 			where TSecond : IComponent
 			where TThird : IComponent
 		{
-			void Execute(in TFirst arg1, in TSecond arg2, in TThird arg3);
+			void Execute(TFirst arg1, TSecond arg2, TThird arg3);
 		}
 	}
 }

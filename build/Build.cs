@@ -159,7 +159,7 @@ public partial class Build : NukeBuild
 
 			//var trxFiles = TestArtifactsDirectory.GlobFiles("*.trx").Select(x => new FileInfo(x));
 
-			AzurePipelines.Instance?.PublishTestResults(ArtifactsDirectory.GlobFiles("*.trx").Select(x => x.ToString()), AzurePipelines.Instance?.BuildNumber, mergeResults: true);
+			AzurePipelines.Instance?.PublishTestResults(AzurePipelines.Instance?.BuildNumber, "XUnit", ArtifactsDirectory.GlobFiles("*.trx").Select(x => x.ToString()), mergeResults: true);
 
 		});
 

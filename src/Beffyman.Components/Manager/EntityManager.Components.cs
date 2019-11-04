@@ -8,8 +8,8 @@ namespace Beffyman.Components.Manager
 {
 	public partial class EntityManager
 	{
-		public bool HasComponent<T>(in Entity entity) where T : class, IComponent, new() => HasComponent(entity, typeof(T));
-		public bool HasComponent(in Entity entity, Type type)
+		public bool HasComponent<T>(Entity entity) where T : class, IComponent, new() => HasComponent(entity, typeof(T));
+		public bool HasComponent(Entity entity, Type type)
 		{
 			if (entity == null || type == null)
 			{
@@ -25,7 +25,7 @@ namespace Beffyman.Components.Manager
 		}
 
 
-		public IComponent GetComponent(in Entity entity, Type type)
+		public IComponent GetComponent(Entity entity, Type type)
 		{
 			if (entity == null || type == null)
 			{
@@ -43,7 +43,7 @@ namespace Beffyman.Components.Manager
 			return default;
 		}
 
-		public T GetComponent<T>(in Entity entity) where T : class, IComponent, new()
+		public T GetComponent<T>(Entity entity) where T : class, IComponent, new()
 		{
 			if (entity == null)
 			{
@@ -65,15 +65,15 @@ namespace Beffyman.Components.Manager
 			return default;
 		}
 
-		public IComponent AddComponent(in Entity entity, Type type)
+		public IComponent AddComponent(Entity entity, Type type)
 		{
 			if (entity == null || type == null)
 			{
 				return default;
 			}
 
-			var componentDictionary = _components.GetOrAdd(type, CreateComponentDictionary);
-			return componentDictionary.GetOrAdd(entity, CreateComponent);
+			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+			return componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
 
 			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
@@ -82,7 +82,7 @@ namespace Beffyman.Components.Manager
 			}
 		}
 
-		public T AddComponent<T>(in Entity entity) where T : class, IComponent, new()
+		public T AddComponent<T>(Entity entity) where T : class, IComponent, new()
 		{
 			if (entity == null)
 			{
@@ -90,8 +90,8 @@ namespace Beffyman.Components.Manager
 			}
 
 			var type = typeof(T);
-			var componentDictionary = _components.GetOrAdd(type, CreateComponentDictionary);
-			var component = componentDictionary.GetOrAdd(entity, CreateComponent);
+			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+			var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
 
 			if (component is T typedComponent)
 			{
@@ -109,7 +109,7 @@ namespace Beffyman.Components.Manager
 
 
 
-		public T AddComponent<T>(in Entity entity, T addedComponent, bool overwrite = false) where T : class, IComponent, new()
+		public T AddComponent<T>(Entity entity, T addedComponent, bool overwrite = false) where T : class, IComponent, new()
 		{
 			if (entity == null)
 			{
@@ -117,7 +117,7 @@ namespace Beffyman.Components.Manager
 			}
 
 			var type = typeof(T);
-			var componentDictionary = _components.GetOrAdd(type, CreateComponentDictionary);
+			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
 
 			if (componentDictionary.TryGetValue(entity, out IComponent component))
 			{
@@ -162,15 +162,11 @@ namespace Beffyman.Components.Manager
 			return default(T);
 
 			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
-			IComponent CreateComponent(Entity e)
-			{
-				return addedComponent;
-			}
 		}
 
 
-		public bool RemoveComponent<T>(in Entity entity) where T : class, IComponent, new() => RemoveComponent(entity, typeof(T));
-		public bool RemoveComponent(in Entity entity, Type type)
+		public bool RemoveComponent<T>(Entity entity) where T : class, IComponent, new() => RemoveComponent(entity, typeof(T));
+		public bool RemoveComponent(Entity entity, Type type)
 		{
 			if (entity == null || type == null)
 			{
@@ -193,7 +189,7 @@ namespace Beffyman.Components.Manager
 			return false;
 		}
 
-		public void RemoveAllComponents(in Entity entity)
+		public void RemoveAllComponents(Entity entity)
 		{
 			foreach (var typedComponents in _components)
 			{
