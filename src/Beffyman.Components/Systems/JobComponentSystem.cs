@@ -116,6 +116,7 @@ namespace Beffyman.Components.Systems
 				int index = 0;
 
 				//Loop through entities
+#warning Need to implement ArcheType searches for entities
 				foreach (var entity in Manager._entities)
 				{
 					//If we haven't reached the batch size yet, just increment, store the entity and keep looping
@@ -161,6 +162,7 @@ namespace Beffyman.Components.Systems
 			}
 			else
 			{
+#warning Need to implement ArcheType searches for entities
 				foreach (var entity in Manager._entities)
 				{
 					job.Execute(entity.GetComponent<TFirst>());
@@ -190,6 +192,7 @@ namespace Beffyman.Components.Systems
 				int index = 0;
 
 				//Loop through entities
+#warning Need to implement ArcheType searches for entities
 				foreach (var entity in Manager._entities)
 				{
 					//If we haven't reached the batch size yet, just increment, store the entity and keep looping
@@ -235,6 +238,7 @@ namespace Beffyman.Components.Systems
 			}
 			else
 			{
+#warning Need to implement ArcheType searches for entities
 				foreach (var entity in Manager._entities)
 				{
 					job.Execute(entity.GetComponent<TFirst>(), entity.GetComponent<TSecond>());
