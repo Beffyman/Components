@@ -7,6 +7,12 @@ namespace Beffyman.Components.Tests.Components
 {
 	public class RigidBody : IComponent
 	{
+		public RigidBody()
+		{
+			Mass = 1;
+			Restitution = 1;
+		}
+
 		private float _mass;
 		public float Mass
 		{

@@ -11,7 +11,7 @@ namespace Beffyman.Components.Tests.Systems
 	[BeforeSystem(typeof(TransformRigidBodySystem))]
 	public sealed class GravitySystem : JobComponentSystem
 	{
-		public Vector2 Gravity { get; set; }
+		public Vector2 Gravity { get; set; } = new Vector2(0, -9.81f);
 
 		protected override void OnUpdate(in UpdateStep step)
 		{
