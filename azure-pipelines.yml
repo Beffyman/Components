@@ -41,6 +41,10 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Label Performance --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Performance
+              pathtoPublish: 'Performance'
   - stage: ubuntu_latest
     displayName: 'ubuntu-latest'
     dependsOn: [  ]
@@ -83,3 +87,7 @@ stages:
             inputs:
               filePath: 'build.ps1'
               arguments: 'Label Performance --skip'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              artifactName: Performance
+              pathtoPublish: 'Performance'

@@ -16,10 +16,20 @@ namespace Beffyman.Components.Internal
 
 		public int GetHashCode(ArcheType obj)
 		{
+			return GetHashCode(obj.ComponentTypes);
+		}
+
+		public static int GetHashCode(Type[] components)
+		{
 			int hc = 0;
-			for (int i = 0; i < obj.ComponentTypes.Length; i++)
+
+			for (int i = 0; i < components.Length; i++)
 			{
-				hc ^= obj.ComponentTypes[i].GetHashCode();
+				var component = components[i];
+				if (component != null)
+				{
+					hc ^= components[i].GetHashCode();
+				}
 			}
 
 			return hc;

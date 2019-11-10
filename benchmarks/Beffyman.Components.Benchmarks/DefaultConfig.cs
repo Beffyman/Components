@@ -12,10 +12,10 @@ namespace Beffyman.Components.Benchmarks
 	internal sealed class DefaultConfig : ManualConfig
 	{
 
-		internal const float DELTATIME = (1f / 30f);
-		internal const int PREPARE_ENTITIES = 100;
+		internal const float DELTATIME = (1f / 60f);
+		internal const int PREPARE_ENTITIES = 100_000;
 		internal const int PREPARE_LOOPS = 100;
-		internal const int TEST_LOOPS = 10000;
+		internal const int TEST_LOOPS = 100_000;
 
 		public DefaultConfig()
 		{

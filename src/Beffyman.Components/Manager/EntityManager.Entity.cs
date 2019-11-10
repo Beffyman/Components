@@ -15,6 +15,8 @@ namespace Beffyman.Components.Manager
 			_entities.Add(entity);
 
 			entity.Ready = true;
+
+			RemapEntityArcheType(entity);
 			return entity;
 		}
 

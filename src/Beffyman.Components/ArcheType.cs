@@ -7,10 +7,13 @@ using Beffyman.Components.Manager;
 
 namespace Beffyman.Components
 {
-	public sealed class ArcheType
+	internal sealed class ArcheType
 	{
 		internal HashSet<Type> _componentTypes { get; }
-		public readonly Type[] ComponentTypes;
+		public Type[] ComponentTypes { get; }
+
+		public static readonly ArcheType Empty = new ArcheType(Array.Empty<Type>());
+
 
 		public ArcheType(Type[] componentTypes)
 		{

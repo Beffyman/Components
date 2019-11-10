@@ -10,8 +10,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\Beffyman.Components\Beffyman.Components.csproj" />
+		<ProjectReference Include="..\..\src\Beffyman.Components\Beffyman.Components.csproj" />
 	</ItemGroup>
-
-
 </Project>

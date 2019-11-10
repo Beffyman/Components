@@ -16,12 +16,15 @@ namespace Beffyman.Components.Manager
 				return false;
 			}
 
-			if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
+			lock (entity)
 			{
-				return componentsOfT.ContainsKey(entity);
-			}
+				if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
+				{
+					return componentsOfT.ContainsKey(entity);
+				}
 
-			return false;
+				return false;
+			}
 		}
 
 
@@ -32,15 +35,18 @@ namespace Beffyman.Components.Manager
 				return default;
 			}
 
-			if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
+			lock (entity)
 			{
-				if (componentsOfT.TryGetValue(entity, out IComponent component))
+				if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
 				{
-					return component;
+					if (componentsOfT.TryGetValue(entity, out IComponent component))
+					{
+						return component;
+					}
 				}
-			}
 
-			return default;
+				return default;
+			}
 		}
 
 		public T GetComponent<T>(Entity entity) where T : class, IComponent, new()
@@ -50,19 +56,22 @@ namespace Beffyman.Components.Manager
 				return default;
 			}
 
-			var type = typeof(T);
-			if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
+			lock (entity)
 			{
-				if (componentsOfT.TryGetValue(entity, out IComponent component))
+				var type = typeof(T);
+				if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
 				{
-					if (component is T typedComponent)
+					if (componentsOfT.TryGetValue(entity, out IComponent component))
 					{
-						return typedComponent;
+						if (component is T typedComponent)
+						{
+							return typedComponent;
+						}
 					}
 				}
-			}
 
-			return default;
+				return default;
+			}
 		}
 
 		public IComponent AddComponent(Entity entity, Type type)
@@ -72,8 +81,15 @@ namespace Beffyman.Components.Manager
 				return default;
 			}
 
-			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
-			return componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
+			lock (entity)
+			{
+				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+				var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
+
+				RemapEntityArcheType(entity);
+
+				return component;
+			}
 
 			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
@@ -89,16 +105,22 @@ namespace Beffyman.Components.Manager
 				return default;
 			}
 
-			var type = typeof(T);
-			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
-			var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
-
-			if (component is T typedComponent)
+			lock (entity)
 			{
-				return typedComponent;
+				var type = typeof(T);
+				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+				var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
+
+				RemapEntityArcheType(entity);
+
+				if (component is T typedComponent)
+				{
+					return typedComponent;
+				}
+
+				return default(T);
 			}
 
-			return default(T);
 
 			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
@@ -116,20 +138,28 @@ namespace Beffyman.Components.Manager
 				return default;
 			}
 
-			var type = typeof(T);
-			var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
-
-			if (componentDictionary.TryGetValue(entity, out IComponent component))
+			lock (entity)
 			{
-				if (component is T typedComponent)
+				var type = typeof(T);
+				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+
+				if (componentDictionary.TryGetValue(entity, out IComponent component))
 				{
-					if (overwrite)
+					if (component is T typedComponent)
 					{
-						if (componentDictionary.TryRemove(entity, out _))
+						if (overwrite)
 						{
-							if (componentDictionary.TryAdd(entity, addedComponent))
+							if (componentDictionary.TryRemove(entity, out _))
 							{
-								return addedComponent;
+								if (componentDictionary.TryAdd(entity, addedComponent))
+								{
+									RemapEntityArcheType(entity);
+									return addedComponent;
+								}
+								else
+								{
+									return AddComponent(entity, addedComponent, overwrite);
+								}
 							}
 							else
 							{
@@ -138,28 +168,29 @@ namespace Beffyman.Components.Manager
 						}
 						else
 						{
-							return AddComponent(entity, addedComponent, overwrite);
+							RemapEntityArcheType(entity);
+							return typedComponent;
 						}
 					}
-					else
-					{
-						return typedComponent;
-					}
-				}
-			}
-			else
-			{
-				if (componentDictionary.TryAdd(entity, addedComponent))
-				{
-					return addedComponent;
 				}
 				else
 				{
-					return AddComponent(entity, addedComponent, overwrite);
+					if (componentDictionary.TryAdd(entity, addedComponent))
+					{
+						RemapEntityArcheType(entity);
+						return addedComponent;
+					}
+					else
+					{
+						return AddComponent(entity, addedComponent, overwrite);
+					}
 				}
+
+				RemapEntityArcheType(entity);
+				return default(T);
 			}
 
-			return default(T);
+
 
 			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 		}
@@ -173,20 +204,25 @@ namespace Beffyman.Components.Manager
 				return false;
 			}
 
-			if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
+			lock (entity)
 			{
-				if (componentsOfT.TryRemove(entity, out IComponent component))
+				if (_components.TryGetValue(type, out ConcurrentDictionary<Entity, IComponent> componentsOfT))
 				{
-					if (component is IDisposable disposable)
+					if (componentsOfT.TryRemove(entity, out IComponent component))
 					{
-						disposable.Dispose();
+						if (component is IDisposable disposable)
+						{
+							disposable.Dispose();
+						}
+
+						RemapEntityArcheType(entity);
+						return true;
 					}
-
-					return true;
 				}
-			}
 
-			return false;
+				RemapEntityArcheType(entity);
+				return false;
+			}
 		}
 
 		public void RemoveAllComponents(Entity entity)
@@ -199,12 +235,35 @@ namespace Beffyman.Components.Manager
 
 		public IEnumerable<IComponent> GetComponents(Entity entity)
 		{
-			foreach (var typedComponents in _components)
+			lock (entity)
 			{
-				if (typedComponents.Value.TryGetValue(entity, out IComponent component))
+				foreach (var typedComponents in _components)
 				{
-					yield return component;
+					if (typedComponents.Value.TryGetValue(entity, out IComponent component))
+					{
+						yield return component;
+					}
 				}
+			}
+		}
+
+		public Type[] GetComponentTypes(Entity entity)
+		{
+			lock (entity)
+			{
+				//Should try and use a Pool here, but returning it may be tricky if this method isn't locked down
+				Type[] types = new Type[_components.Count];
+
+				int i = 0;
+				foreach (var typedComponents in _components)
+				{
+					if (typedComponents.Value.ContainsKey(entity))
+					{
+						types[i++] = typedComponents.Key;
+					}
+				}
+
+				return types;
 			}
 		}
 

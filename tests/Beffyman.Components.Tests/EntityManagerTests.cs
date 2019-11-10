@@ -5,6 +5,8 @@ using Beffyman.Components.Manager;
 using Beffyman.Components.Tests.Components;
 using Beffyman.Components.Tests.Systems;
 using Xunit;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Beffyman.Components.Tests
 {
@@ -94,6 +96,31 @@ namespace Beffyman.Components.Tests
 			Assert.NotEqual(Vector2.Zero, rigidBody.Velocity);
 
 		}
+
+
+
+		[Fact]
+		public void ArcheTypeOperations()
+		{
+			var entity = Manager.CreateEntity();
+
+			var blankArcheType = Manager.GetArcheType(entity);
+
+			var transform = Manager.AddComponent<Transform>(entity);
+
+			var transformArcheType = Manager.GetArcheType(entity);
+
+			var rigidBody = Manager.AddComponent<RigidBody>(entity);
+
+			var trans_rigid_ArcheType = Manager.GetArcheType(entity);
+
+
+			Assert.NotEqual(blankArcheType, transformArcheType);
+			Assert.NotEqual(blankArcheType, trans_rigid_ArcheType);
+			Assert.NotEqual(trans_rigid_ArcheType, transformArcheType);
+		}
+
+
 
 
 	}

@@ -191,6 +191,7 @@ public partial class Build : NukeBuild
 		.DependsOn(Label)
 		.DependsOn(Clean)
 		.DependsOn(Compile)
+		.Produces(PerformanceArtifactsDirectory)
 		.Executes(() =>
 		{
 			EnsureExistingDirectory(PerformanceArtifactsDirectory);

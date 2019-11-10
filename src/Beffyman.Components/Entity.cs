@@ -10,7 +10,7 @@ namespace Beffyman.Components
 	/// </summary>
 	public partial class Entity
 	{
-		private static int nextId = 0;
+		private static int nextId;
 
 		/// <summary>
 		/// Unique Id of the entity, this may be reused though if a previous entity was destroyed

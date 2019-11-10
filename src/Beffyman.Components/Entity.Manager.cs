@@ -59,5 +59,10 @@ namespace Beffyman.Components
 			return Manager.GetComponents(this);
 		}
 
+		public IEnumerable<Type> GetComponentTypes()
+		{
+			return Manager.GetComponentTypes(this);
+		}
+
 	}
 }

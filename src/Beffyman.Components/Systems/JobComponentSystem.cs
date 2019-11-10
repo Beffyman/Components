@@ -102,9 +102,14 @@ namespace Beffyman.Components.Systems
 				return;
 			}
 
+			var componentTypes = ArrayPool<Type>.Shared.Rent(1);
+			componentTypes[0] = typeof(TFirst);
+
+			var entities = Manager.GetEntities(componentTypes);
+
 			if (Manager.Options.Multithreading)
 			{
-				int entityCount = Manager._entities.Count;
+				int entityCount = entities.Count;
 				int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
 				int batches = (int)Math.Ceiling((float)entityCount / batchSize);
 
@@ -117,7 +122,7 @@ namespace Beffyman.Components.Systems
 
 				//Loop through entities
 #warning Need to implement ArcheType searches for entities
-				foreach (var entity in Manager._entities)
+				foreach (var entity in entities)
 				{
 					//If we haven't reached the batch size yet, just increment, store the entity and keep looping
 					if (index < batchSize)
@@ -163,25 +168,34 @@ namespace Beffyman.Components.Systems
 			else
 			{
 #warning Need to implement ArcheType searches for entities
-				foreach (var entity in Manager._entities)
+				foreach (var entity in entities)
 				{
 					job.Execute(entity.GetComponent<TFirst>());
 				}
 			}
+
+			ArrayPool<Type>.Shared.Return(componentTypes, true);
 		}
 
 		protected void Execute<T, TFirst, TSecond>(in T job) where T : unmanaged, IJobForEach<TFirst, TSecond>
 			where TFirst : class, IComponent, new()
 			where TSecond : class, IComponent, new()
 		{
-			if(Manager._entities.Count== 0)
+			if (Manager._entities.Count == 0)
 			{
 				return;
 			}
 
+			var componentTypes = ArrayPool<Type>.Shared.Rent(2);
+			componentTypes[0] = typeof(TFirst);
+			componentTypes[1] = typeof(TSecond);
+
+			var entities = Manager.GetEntities(componentTypes);
+
+
 			if (Manager.Options.Multithreading)
 			{
-				int entityCount = Manager._entities.Count;
+				int entityCount = entities.Count;
 				int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
 				int batches = (int)Math.Ceiling((float)entityCount / batchSize);
 
@@ -192,8 +206,7 @@ namespace Beffyman.Components.Systems
 				int index = 0;
 
 				//Loop through entities
-#warning Need to implement ArcheType searches for entities
-				foreach (var entity in Manager._entities)
+				foreach (var entity in entities)
 				{
 					//If we haven't reached the batch size yet, just increment, store the entity and keep looping
 					if (index < batchSize)
@@ -221,7 +234,6 @@ namespace Beffyman.Components.Systems
 					executor.Create(job, array, index, waitLock);
 					//Queue a new thread with the batch
 					_ = ThreadPool.UnsafeQueueUserWorkItem(executor, true);
-
 				}
 				else
 				{
@@ -238,20 +250,30 @@ namespace Beffyman.Components.Systems
 			}
 			else
 			{
-#warning Need to implement ArcheType searches for entities
-				foreach (var entity in Manager._entities)
+				foreach (var entity in entities)
 				{
 					job.Execute(entity.GetComponent<TFirst>(), entity.GetComponent<TSecond>());
 				}
 			}
+
+			ArrayPool<Type>.Shared.Return(componentTypes, true);
 		}
 
 
-		protected abstract void OnUpdate(in UpdateStep step);
+		protected virtual void OnUpdate(in UpdateStep step) { }
 
 		internal override void Update(in UpdateStep step)
 		{
 			OnUpdate(step);
+
+			//Do Work for the jobs here, queue up threads and then sync them up
+		}
+
+		protected virtual void OnFixedUpdate(in UpdateStep step) { }
+
+		internal override void FixedUpdate(in UpdateStep step)
+		{
+			OnFixedUpdate(step);
 
 			//Do Work for the jobs here, queue up threads and then sync them up
 		}

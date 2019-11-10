@@ -55,6 +55,8 @@ namespace Beffyman.Components.Systems
 		}
 
 		internal abstract void Update(in UpdateStep step);
+		internal abstract void FixedUpdate(in UpdateStep step);
+
 		internal void Create()
 		{
 			OnCreate();

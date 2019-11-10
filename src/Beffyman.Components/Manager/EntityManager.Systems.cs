@@ -190,7 +190,6 @@ namespace Beffyman.Components.Manager
 				if (_firstUpdate)
 				{
 					system.Create();
-					_firstUpdate = false;
 				}
 
 				if (system.WasStarted)
@@ -208,7 +207,46 @@ namespace Beffyman.Components.Manager
 					system.Stop();
 				}
 			}
+
+			if (_firstUpdate)
+			{
+				_firstUpdate = false;
+			}
 		}
+
+		private void FixedUpdateSystems(in UpdateStep step)
+		{
+			for (int i = 0; i < _componentSystems.Length; i++)
+			{
+				var system = _componentSystems[i];
+
+				if (_firstUpdate)
+				{
+					system.Create();
+				}
+
+				if (system.WasStarted)
+				{
+					system.Start();
+				}
+
+				if (system.Enabled)
+				{
+					_componentSystems[i].FixedUpdate(step);
+				}
+
+				if (system.WasStopped)
+				{
+					system.Stop();
+				}
+			}
+
+			if (_firstUpdate)
+			{
+				_firstUpdate = false;
+			}
+		}
+
 
 		private void DestroySystems()
 		{

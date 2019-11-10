@@ -22,7 +22,8 @@ namespace Beffyman.Components.Manager
 		private readonly ComponentSystemBase[] _componentSystems;
 		private readonly Dictionary<Type, ComponentSystemBase> _indexedComponentSystems;
 
-		private readonly ConcurrentHashSet<ArcheType> _archTypes;
+		private readonly ConcurrentSet<ArcheType> _archTypes;
+		private readonly ConcurrentDictionary<ArcheType, ConcurrentHashSet<Entity>> _archeTypeMap;
 		private readonly ConcurrentDictionary<Entity, ArcheType> _entityArcheTypes;
 
 		public EntityManagerOptions Options { get; }
@@ -41,13 +42,23 @@ namespace Beffyman.Components.Manager
 			_componentSystems = LoadSystemComponents();
 			_indexedComponentSystems = _componentSystems.ToDictionary(x => x.GetType(), x => x, TypeEqualityComparer.Instance);
 
-			_archTypes = new ConcurrentHashSet<ArcheType>(Environment.ProcessorCount, (int)Options.InitialPoolSize, ArcheTypeEqualityComparer.Instance);
+			_archTypes = new ConcurrentSet<ArcheType>(Environment.ProcessorCount, (int)Options.InitialPoolSize, ArcheTypeEqualityComparer.Instance);
+			_archeTypeMap = new ConcurrentDictionary<ArcheType, ConcurrentHashSet<Entity>>(Environment.ProcessorCount, (int)Options.InitialPoolSize, ArcheTypeEqualityComparer.Instance);
 			_entityArcheTypes = new ConcurrentDictionary<Entity, ArcheType>(Environment.ProcessorCount, (int)Options.InitialPoolSize, EntityEqualityComparer.Instance);
+
+			//Assign empty archetype to collections
+			_archTypes.Add(ArcheType.Empty);
+			_archeTypeMap.TryAdd(ArcheType.Empty, CreateArcheTypeEntitySet());
 		}
 
 		public void Update(in UpdateStep step)
 		{
 			UpdateSystems(step);
+		}
+
+		public void FixedUpdate(in UpdateStep step)
+		{
+			FixedUpdateSystems(step);
 		}
 
 		public void Destroy()

@@ -10,11 +10,19 @@ namespace Beffyman.Components.Systems
 	/// </summary>
 	public abstract class ComponentSystem : ComponentSystemBase
 	{
-		protected abstract void OnUpdate(in UpdateStep step);
+		protected virtual void OnUpdate(in UpdateStep step) { }
 
 		internal override void Update(in UpdateStep step)
 		{
 			OnUpdate(step);
+		}
+
+
+		protected virtual void OnFixedUpdate(in UpdateStep step) { }
+
+		internal override void FixedUpdate(in UpdateStep step)
+		{
+			OnFixedUpdate(step);
 		}
 	}
 }
