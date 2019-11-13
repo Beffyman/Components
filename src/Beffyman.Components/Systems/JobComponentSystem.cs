@@ -35,7 +35,7 @@ namespace Beffyman.Components.Systems
 				int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
 				int batches = (int)Math.Ceiling((float)entityCount / batchSize);
 
-				using CountdownEvent waitLock = new CountdownEvent(batches);
+				PooledCountdownEvent waitLock = PooledCountdownEvent.Get(batches);
 
 				var executor = Executor<T>.Get();
 				var array = ArrayPool<Entity>.Shared.Rent(batchSize);
@@ -80,10 +80,7 @@ namespace Beffyman.Components.Systems
 					executor = null;
 				}
 
-				while (waitLock.CurrentCount > 0)
-				{
-					Thread.Sleep(0);
-				}
+				waitLock.SleepSpinWaitReturn();
 			}
 			else
 			{
@@ -113,7 +110,7 @@ namespace Beffyman.Components.Systems
 				int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
 				int batches = (int)Math.Ceiling((float)entityCount / batchSize);
 
-				using CountdownEvent waitLock = new CountdownEvent(batches);
+				PooledCountdownEvent waitLock = PooledCountdownEvent.Get(batches);
 
 
 				var executor = Executor<T, TFirst>.Get();
@@ -160,10 +157,7 @@ namespace Beffyman.Components.Systems
 					executor = null;
 				}
 
-				while (waitLock.CurrentCount > 0)
-				{
-					Thread.Sleep(0);
-				}
+				waitLock.SleepSpinWaitReturn();
 			}
 			else
 			{
@@ -199,7 +193,7 @@ namespace Beffyman.Components.Systems
 				int batchSize = (int)Math.Ceiling((float)entityCount / Environment.ProcessorCount);
 				int batches = (int)Math.Ceiling((float)entityCount / batchSize);
 
-				using CountdownEvent waitLock = new CountdownEvent(batches);
+				PooledCountdownEvent waitLock = PooledCountdownEvent.Get(batches);
 
 				var executor = Executor<T, TFirst, TSecond>.Get();
 				var array = ArrayPool<Entity>.Shared.Rent(batchSize);
@@ -243,10 +237,7 @@ namespace Beffyman.Components.Systems
 					executor = null;
 				}
 
-				while (waitLock.CurrentCount > 0)
-				{
-					Thread.Sleep(0);
-				}
+				waitLock.SleepSpinWaitReturn();
 			}
 			else
 			{
