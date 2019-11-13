@@ -9,53 +9,67 @@ namespace Beffyman.Components.Systems
 {
 	public partial class JobComponentSystem
 	{
-		private class Executor<T> : IThreadPoolWorkItem
-			where T : unmanaged, IJobForEach
+		private abstract class Executor
 		{
-			private static InfiniteScaleObjectPool<Executor<T>> Pooled = new InfiniteScaleObjectPool<Executor<T>>();
+			protected ArcheType ArcheType;
+			protected CountdownEvent Countdown;
+			protected int BatchSize;
+			protected Entity[] Entities;
 
-			public static Executor<T> Get()
+			protected void SetToDefault()
 			{
-				return Pooled.Get();
+				ArcheType = default;
+				Entities = default;
+				BatchSize = default;
+				Countdown = default;
 			}
 
-			private static void Return(Executor<T> executor)
-			{
-				ArrayPool<Entity>.Shared.Return(executor.Entities, true);
-				executor.Entities = default;
-				executor.Job = default;
-				executor.BatchSize = default;
-				executor.Countdown = default;
-				Pooled.Return(executor);
-			}
-
-			private CountdownEvent Countdown;
-			private int BatchSize;
-			private Entity[] Entities;
-			private T Job;
-
-			public void Create(in T job, Entity[] entities, int batchSize, CountdownEvent countdown)
-			{
-				Job = job;
-				Entities = entities;
-				BatchSize = batchSize;
-				Countdown = countdown;
-			}
-
-			public void Execute()
-			{
-				for (int i = 0; i < BatchSize; i++)
-				{
-					//var entity = Entities[i];
-					Job.Execute();
-				}
-
-				Countdown.Signal();
-				Return(this);
-			}
 		}
 
-		private class Executor<T, TFirst> : IThreadPoolWorkItem
+
+		//private class Executor<T> : Executor, IThreadPoolWorkItem
+		//	where T : unmanaged, IJobForEach
+		//{
+		//	private static InfiniteScaleObjectPool<Executor<T>> Pooled = new InfiniteScaleObjectPool<Executor<T>>();
+
+		//	public static Executor<T> Get()
+		//	{
+		//		return Pooled.Get();
+		//	}
+
+		//	private static void Return(Executor<T> executor)
+		//	{
+		//		ArrayPool<Entity>.Shared.Return(executor.Entities, true);
+		//		executor.SetToDefault();
+		//		executor.Job = default;
+		//		Pooled.Return(executor);
+		//	}
+
+		//	private T Job;
+
+		//	public void Create(in T job, ArcheType archetype, Entity[] entities, int batchSize, CountdownEvent countdown)
+		//	{
+		//		ArcheType = archetype;
+		//		Job = job;
+		//		Entities = entities;
+		//		BatchSize = batchSize;
+		//		Countdown = countdown;
+		//	}
+
+		//	public void Execute()
+		//	{
+		//		for (int i = 0; i < BatchSize; i++)
+		//		{
+		//			//var entity = Entities[i];
+		//			Job.Execute();
+		//		}
+
+		//		Countdown.Signal();
+		//		Return(this);
+		//	}
+		//}
+
+		private class Executor<T, TFirst> : Executor, IThreadPoolWorkItem
 			where T : unmanaged, IJobForEach<TFirst>
 			where TFirst : class, IComponent, new()
 		{
@@ -69,20 +83,16 @@ namespace Beffyman.Components.Systems
 			private static void Return(Executor<T, TFirst> executor)
 			{
 				ArrayPool<Entity>.Shared.Return(executor.Entities, true);
-				executor.Entities = default;
+				executor.SetToDefault();
 				executor.Job = default;
-				executor.BatchSize = default;
-				executor.Countdown = default;
 				Pooled.Return(executor);
 			}
 
-			private CountdownEvent Countdown;
-			private int BatchSize;
-			private Entity[] Entities;
 			private T Job;
 
-			public void Create(in T job, Entity[] entities, int batchSize, CountdownEvent countdown)
+			public void Create(in T job, ArcheType archetype, Entity[] entities, int batchSize, CountdownEvent countdown)
 			{
+				ArcheType = archetype;
 				Entities = entities;
 				Job = job;
 				BatchSize = batchSize;
@@ -95,7 +105,9 @@ namespace Beffyman.Components.Systems
 				{
 					var entity = Entities[i];
 
-					Job.Execute(entity.GetComponent<TFirst>());
+					var components = entity.GetEntityComponentsByArcheType(ArcheType);
+
+					Job.Execute(components[typeof(TFirst)] as TFirst);
 				}
 
 				Countdown.Signal();
@@ -103,7 +115,7 @@ namespace Beffyman.Components.Systems
 			}
 		}
 
-		private class Executor<T, TFirst, TSecond> : IThreadPoolWorkItem
+		private class Executor<T, TFirst, TSecond> : Executor, IThreadPoolWorkItem
 			where T : unmanaged, IJobForEach<TFirst, TSecond>
 			where TFirst : class, IComponent, new()
 			where TSecond : class, IComponent, new()
@@ -118,20 +130,16 @@ namespace Beffyman.Components.Systems
 			private static void Return(Executor<T, TFirst, TSecond> executor)
 			{
 				ArrayPool<Entity>.Shared.Return(executor.Entities, true);
-				executor.Entities = default;
+				executor.SetToDefault();
 				executor.Job = default;
-				executor.BatchSize = default;
-				executor.Countdown = default;
 				Pooled.Return(executor);
 			}
 
-			private CountdownEvent Countdown;
-			private int BatchSize;
-			private Entity[] Entities;
 			private T Job;
 
-			public void Create(in T job, Entity[] entities, int batchSize, CountdownEvent countdown)
+			public void Create(in T job, ArcheType archetype, Entity[] entities, int batchSize, CountdownEvent countdown)
 			{
+				ArcheType = archetype;
 				Entities = entities;
 				Job = job;
 				BatchSize = batchSize;
@@ -144,7 +152,9 @@ namespace Beffyman.Components.Systems
 				{
 					var entity = Entities[i];
 
-					Job.Execute(entity.GetComponent<TFirst>(), entity.GetComponent<TSecond>());
+					var components = entity.GetEntityComponentsByArcheType(ArcheType);
+
+					Job.Execute(components[typeof(TFirst)] as TFirst, components[typeof(TSecond)] as TSecond);
 				}
 
 				Countdown.Signal();

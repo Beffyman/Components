@@ -23,6 +23,11 @@ namespace Beffyman.Components.Internal
 			_dictionary = new ConcurrentDictionary<int, T>(concurrencyLevel, capacity);
 			_comparer = comparer;
 		}
+		public ConcurrentSet(IEqualityComparer<T> comparer)
+		{
+			_dictionary = new ConcurrentDictionary<int, T>();
+			_comparer = comparer;
+		}
 
 		public int Count => _dictionary.Count;
 

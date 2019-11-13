@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
@@ -62,6 +63,11 @@ namespace Beffyman.Components
 		public IEnumerable<Type> GetComponentTypes()
 		{
 			return Manager.GetComponentTypes(this);
+		}
+
+		internal Dictionary<Type, IComponent> GetEntityComponentsByArcheType(ArcheType archeType)
+		{
+			return Manager.GetEntityComponentsByArcheType(archeType, this);
 		}
 
 	}

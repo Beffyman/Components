@@ -6,18 +6,23 @@ using Beffyman.Components.Systems;
 
 namespace Beffyman.Components.Benchmarks.Systems
 {
+	public class WorkComponent : IComponent
+	{
+
+	}
+
 	public class DoWorkJobSystem : JobComponentSystem
 	{
 		protected override void OnUpdate(in UpdateStep step)
 		{
 			var job = new DoWorkJob();
 
-			Execute(job);
+			Execute<DoWorkJob, WorkComponent>(job);
 		}
 
-		protected readonly struct DoWorkJob : IJobForEach
+		protected readonly struct DoWorkJob : IJobForEach<WorkComponent>
 		{
-			public void Execute()
+			public void Execute(WorkComponent work)
 			{
 
 			}

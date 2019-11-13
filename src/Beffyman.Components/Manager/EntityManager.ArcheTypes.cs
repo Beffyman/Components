@@ -23,16 +23,21 @@ namespace Beffyman.Components.Manager
 				{
 					if (_archeTypeMap.ContainsKey(currentArcheType))
 					{
-						_archeTypeMap[currentArcheType].TryRemove(entity);
+						_archeTypeMap[currentArcheType].Remove(entity, out _);
 					}
 
 					if (archeType.ComponentTypes.Length > 0)
 					{
 						_entityArcheTypes[entity] = archeType;
 
-						var entities = _archeTypeMap.GetOrAdd(archeType, (arch) => new ConcurrentHashSet<Entity>(Environment.ProcessorCount, (int)Options.InitialPoolSize, EntityEqualityComparer.Instance));
+						var entities = _archeTypeMap.GetOrAdd(archeType, (arch) => CreateArcheTypeEntitySet());
 
-						entities.Add(entity);
+						Dictionary<Type, IComponent> entityComponents = entities.GetOrAdd(entity, () => CreateComponentTypeIndex());
+
+						foreach (var component in archeType.ComponentTypes)
+						{
+							entityComponents.TryAdd(component, _components[component][entity]);
+						}
 					}
 					else
 					{
@@ -47,14 +52,31 @@ namespace Beffyman.Components.Manager
 				{
 					_entityArcheTypes.TryAdd(entity, archeType);
 					var entities = _archeTypeMap.GetOrAdd(archeType, (arch) => CreateArcheTypeEntitySet());
-					entities.Add(entity);
+
+					Dictionary<Type, IComponent> entityComponents = null;
+
+					if (!entities.TryGetValue(entity, out entityComponents))
+					{
+						entityComponents = CreateComponentTypeIndex();
+						entities.Add(entity, entityComponents);
+					}
+
+					foreach (var component in archeType.ComponentTypes)
+					{
+						entityComponents.TryAdd(component, _components[component][entity]);
+					}
 				}
 			}
 		}
 
-		private ConcurrentHashSet<Entity> CreateArcheTypeEntitySet()
+		private static Dictionary<Type, IComponent> CreateComponentTypeIndex()
 		{
-			return new ConcurrentHashSet<Entity>(Environment.ProcessorCount, (int)Options.InitialPoolSize, EntityEqualityComparer.Instance);
+			return new Dictionary<Type, IComponent>(TypeEqualityComparer.Instance);
+		}
+
+		private Dictionary<Entity, Dictionary<Type, IComponent>> CreateArcheTypeEntitySet()
+		{
+			return new Dictionary<Entity, Dictionary<Type, IComponent>>((int)Options.InitialPoolSize, EntityEqualityComparer.Instance);
 		}
 
 
@@ -90,23 +112,32 @@ namespace Beffyman.Components.Manager
 			return _archTypes.GetByHash(hashCode);
 		}
 
-		internal ConcurrentHashSet<Entity> GetEntities(ArcheType archeType)
+		internal int GetArcheTypeEntityCount(ArcheType archeType)
 		{
-			if (_archeTypeMap.TryGetValue(archeType, out ConcurrentHashSet<Entity> entities))
+			if (_archeTypeMap.TryGetValue(archeType, out Dictionary<Entity, Dictionary<Type, IComponent>> entities))
 			{
-				return entities;
+				return entities.Count;
 			}
 
-			return null;
+			return default;
 		}
 
-		internal ConcurrentHashSet<Entity> GetEntities(Type[] components)
+		internal void GetEntities(ArcheType archeType, Entity[] mappedArray)
 		{
-			var archeType = GetArcheType(components);
-
-			if (_archeTypeMap.TryGetValue(archeType, out ConcurrentHashSet<Entity> entities))
+			if (_archeTypeMap.TryGetValue(archeType, out Dictionary<Entity, Dictionary<Type, IComponent>> entities))
 			{
-				return entities;
+				entities.Keys.CopyTo(mappedArray, 0);
+			}
+		}
+
+		internal Dictionary<Type, IComponent> GetEntityComponentsByArcheType(ArcheType archeType, Entity entity)
+		{
+			if (_archeTypeMap.TryGetValue(archeType, out Dictionary<Entity, Dictionary<Type, IComponent>> entities))
+			{
+				if (entities.TryGetValue(entity, out Dictionary<Type, IComponent> components))
+				{
+					return components;
+				}
 			}
 
 			return null;

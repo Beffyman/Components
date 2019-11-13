@@ -3,10 +3,10 @@
 	public abstract partial class JobComponentSystem
 	{
 #warning What point even is there to this type of job?  Will probably remove it later
-		protected interface IJobForEach
-		{
-			void Execute();
-		}
+		//protected interface IJobForEach
+		//{
+		//	void Execute();
+		//}
 
 
 		protected interface IJobForEach<T>
