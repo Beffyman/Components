@@ -31,6 +31,7 @@ namespace Beffyman.Components.Internal
 		{
 			while (CurrentCount > 0)
 			{
+				//Dunno if this or this.Wait(); is better for this... I've heard the wait has an initial delay
 				Thread.Sleep(0);
 			}
 			Return(this);

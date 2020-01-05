@@ -120,7 +120,7 @@ namespace Beffyman.Components.Systems
 
 			var entityArray = ArrayPool<Entity>.Shared.Rent(entityCount);
 
-			Manager.GetEntities(archeType, entityArray);
+			Manager.GetEntities(archeType, ref entityArray);
 
 			if (Manager.Options.Multithreading)
 			{
@@ -210,6 +210,8 @@ namespace Beffyman.Components.Systems
 			}
 
 			var entityArray = ArrayPool<Entity>.Shared.Rent(entityCount);
+
+			Manager.GetEntities(archeType, ref entityArray);
 
 			if (Manager.Options.Multithreading)
 			{

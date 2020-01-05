@@ -8,18 +8,37 @@ using Beffyman.Components.Manager;
 
 namespace Beffyman.Components
 {
-	internal sealed class ArcheType : IEquatable<ArcheType>
+	public sealed class ArcheType : IEquatable<ArcheType>
 	{
-		internal HashSet<Type> _componentTypes { get; }
-		public Type[] ComponentTypes { get; }
+		internal Dictionary<int, ArcheType> ChildArcheTypes { get; }
+		internal Dictionary<int, ArcheType> ParentArcheTypes { get; }
 
-		public static readonly ArcheType Empty = new ArcheType(Array.Empty<Type>());
+
+		internal Type[] _componentTypesArray { get; }
+		internal HashSet<Type> _componentTypes { get; }
+
+		public int Length { get; }
+		public int HashCode { get; }
 
 
 		public ArcheType(Type[] componentTypes)
 		{
-			_componentTypes = componentTypes.ToHashSet(TypeEqualityComparer.Instance);
-			ComponentTypes = componentTypes;
+			_componentTypesArray = componentTypes;
+			_componentTypes = componentTypes?.ToHashSet(TypeEqualityComparer.Instance) ?? new HashSet<Type>(TypeEqualityComparer.Instance);
+			Length = _componentTypes?.Count ?? 0;
+			HashCode = ArcheTypeEqualityComparer.GetHashCode(_componentTypesArray);
+			ChildArcheTypes = new Dictionary<int, ArcheType>();
+			ParentArcheTypes = new Dictionary<int, ArcheType>();
+		}
+
+		public ArcheType(HashSet<Type> componentTypes)
+		{
+			_componentTypesArray = componentTypes.ToArray();
+			_componentTypes = componentTypes;
+			Length = _componentTypes?.Count ?? 0;
+			HashCode = ArcheTypeEqualityComparer.GetHashCode(_componentTypesArray);
+			ChildArcheTypes = new Dictionary<int, ArcheType>();
+			ParentArcheTypes = new Dictionary<int, ArcheType>();
 		}
 
 		public bool HasComponent<T>() where T : IComponent
@@ -32,24 +51,69 @@ namespace Beffyman.Components
 			return _componentTypes.Contains(type);
 		}
 
-		public bool IsArcheType(IEnumerable<Type> types)
+		internal void AddParent(ArcheType archetype)
 		{
-			return _componentTypes.SetEquals(types);
+			ParentArcheTypes.Add(ArcheTypeEqualityComparer.Instance.GetHashCode(archetype), archetype);
 		}
 
-		public bool Equals([AllowNull] ArcheType other)
+		public bool IsParentArcheTypeOf(Type[] types)
+		{
+			return ParentArcheTypes.ContainsKey(ArcheTypeEqualityComparer.GetHashCode(types));
+		}
+
+		public bool IsParentArcheTypeOf(ArcheType archetype)
+		{
+			return ParentArcheTypes.ContainsKey(ArcheTypeEqualityComparer.Instance.GetHashCode(archetype));
+		}
+
+		/// <summary>
+		/// Yields all children back from the nested children of this archetype
+		/// </summary>
+		/// <returns></returns>
+		internal IEnumerable<ArcheType> GetAllChildren()
+		{
+			if (ChildArcheTypes.Count > 0)
+			{
+				foreach (var kv in ChildArcheTypes)
+				{
+					yield return kv.Value;
+
+					foreach (var child in kv.Value.GetAllChildren())
+					{
+						yield return child;
+					}
+				}
+			}
+		}
+
+		internal void AddChild(ArcheType archetype)
+		{
+			ChildArcheTypes.Add(ArcheTypeEqualityComparer.Instance.GetHashCode(archetype), archetype);
+		}
+
+		public bool IsChildArcheTypeOf(Type[] types)
+		{
+			return ChildArcheTypes.ContainsKey(ArcheTypeEqualityComparer.GetHashCode(types));
+		}
+
+		public bool IsChildArcheTypeOf(ArcheType archetype)
+		{
+			return ChildArcheTypes.ContainsKey(ArcheTypeEqualityComparer.Instance.GetHashCode(archetype));
+		}
+
+		public bool Equals(ArcheType other)
 		{
 			return ArcheTypeEqualityComparer.Instance.Equals(this, other);
 		}
 
 		public override bool Equals(object obj)
 		{
-			return Equals(obj as ArcheType);
+			return Equals((ArcheType)obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return ArcheTypeEqualityComparer.Instance.GetHashCode(this);
+			return HashCode;
 		}
 	}
 }

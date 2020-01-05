@@ -60,14 +60,14 @@ namespace Beffyman.Components
 			return Manager.GetComponents(this);
 		}
 
-		public IEnumerable<Type> GetComponentTypes()
+		public Type[] GetComponentTypes()
 		{
 			return Manager.GetComponentTypes(this);
 		}
 
 		internal Dictionary<Type, IComponent> GetEntityComponentsByArcheType(ArcheType archeType)
 		{
-			return Manager.GetEntityComponentsByArcheType(archeType, this);
+			return Manager.GetEntityComponentsByArcheType(this, archeType);
 		}
 
 	}

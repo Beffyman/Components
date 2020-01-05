@@ -83,7 +83,7 @@ namespace Beffyman.Components.Manager
 
 			lock (entity)
 			{
-				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+				var componentDictionary = _components[type];
 				var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
 
 				RemapEntityArcheType(entity);
@@ -91,7 +91,6 @@ namespace Beffyman.Components.Manager
 				return component;
 			}
 
-			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
 			{
 				return Activator.CreateInstance(type) as IComponent;
@@ -108,7 +107,7 @@ namespace Beffyman.Components.Manager
 			lock (entity)
 			{
 				var type = typeof(T);
-				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+				var componentDictionary = _components[type];
 				var component = componentDictionary.GetOrAdd(entity, (e) => CreateComponent(e));
 
 				RemapEntityArcheType(entity);
@@ -122,7 +121,6 @@ namespace Beffyman.Components.Manager
 			}
 
 
-			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 			IComponent CreateComponent(Entity e)
 			{
 				return new T();
@@ -141,7 +139,7 @@ namespace Beffyman.Components.Manager
 			lock (entity)
 			{
 				var type = typeof(T);
-				var componentDictionary = _components.GetOrAdd(type, (t) => CreateComponentDictionary(t));
+				var componentDictionary = _components[type];
 
 				if (componentDictionary.TryGetValue(entity, out IComponent component))
 				{
@@ -189,10 +187,6 @@ namespace Beffyman.Components.Manager
 				RemapEntityArcheType(entity);
 				return default(T);
 			}
-
-
-
-			static ConcurrentDictionary<Entity, IComponent> CreateComponentDictionary(Type t) => new ConcurrentDictionary<Entity, IComponent>(EntityEqualityComparer.Instance);
 		}
 
 

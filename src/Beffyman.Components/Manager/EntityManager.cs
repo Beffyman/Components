@@ -17,14 +17,16 @@ namespace Beffyman.Components.Manager
 		internal ConcurrentHashSet<Entity> _entities { get; }
 		public IReadOnlyCollection<Entity> Entities => _entities;
 
-		private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Entity, IComponent>> _components;
+		private readonly Dictionary<Type, ConcurrentDictionary<Entity, IComponent>> _components;
 
 		private readonly ComponentSystemBase[] _componentSystems;
 		private readonly Dictionary<Type, ComponentSystemBase> _indexedComponentSystems;
 
-		private readonly ConcurrentSet<ArcheType> _archTypes;
-		private readonly ConcurrentDictionary<ArcheType, Dictionary<Entity, Dictionary<Type, IComponent>>> _archeTypeMap;
-		private readonly ConcurrentDictionary<Entity, ArcheType> _entityArcheTypes;
+		private readonly object _archeTypeLock = new object();
+		private readonly ConcurrentDictionary<int, ArcheType> _archeTypes;
+		private readonly Dictionary<ArcheType, ConcurrentDictionary<Entity, Dictionary<Type, IComponent>>> _archeTypeEntityMap;
+		//private readonly Dictionary<ArcheType, ConcurrentHashSet<Entity>> _archeTypeEntities;
+		private readonly ConcurrentDictionary<Entity, ArcheType> _entityArcheTypeMap;
 
 		public EntityManagerOptions Options { get; }
 
@@ -38,17 +40,16 @@ namespace Beffyman.Components.Manager
 
 			_entities = new ConcurrentHashSet<Entity>(Environment.ProcessorCount, (int)Options.InitialPoolSize, EntityEqualityComparer.Instance);
 
-			_components = new ConcurrentDictionary<Type, ConcurrentDictionary<Entity, IComponent>>(TypeEqualityComparer.Instance);
+			_components = new Dictionary<Type, ConcurrentDictionary<Entity, IComponent>>(TypeEqualityComparer.Instance);
 			_componentSystems = LoadSystemComponents();
 			_indexedComponentSystems = _componentSystems.ToDictionary(x => x.GetType(), x => x, TypeEqualityComparer.Instance);
 
-			_archTypes = new ConcurrentSet<ArcheType>(ArcheTypeEqualityComparer.Instance);
-			_archeTypeMap = new ConcurrentDictionary<ArcheType, Dictionary<Entity, Dictionary<Type, IComponent>>>(ArcheTypeEqualityComparer.Instance);
-			_entityArcheTypes = new ConcurrentDictionary<Entity, ArcheType>(Environment.ProcessorCount, (int)Options.InitialPoolSize, EntityEqualityComparer.Instance);
+			_archeTypes = new ConcurrentDictionary<int, ArcheType>();
+			_archeTypeEntityMap = new Dictionary<ArcheType, ConcurrentDictionary<Entity, Dictionary<Type, IComponent>>>(ArcheTypeEqualityComparer.Instance);
+			//_archeTypeEntities = new Dictionary<ArcheType, ConcurrentHashSet<Entity>>(ArcheTypeEqualityComparer.Instance);
+			_entityArcheTypeMap = new ConcurrentDictionary<Entity, ArcheType>(EntityEqualityComparer.Instance);
 
-			//Assign empty archetype to collections
-			_archTypes.Add(ArcheType.Empty);
-			_archeTypeMap.TryAdd(ArcheType.Empty, CreateArcheTypeEntitySet());
+			LoadArcheTypes();
 		}
 
 		public void Update(in UpdateStep step)
